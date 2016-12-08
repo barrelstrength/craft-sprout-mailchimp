@@ -38,7 +38,7 @@ class SproutMailChimpPlugin extends BasePlugin
 	{
 		return array(
 			'inlineCss' => array(AttributeType::Bool, 'default' => false),
-			'apiKey'    => AttributeType::String
+			'apiKey'    => array(AttributeType::String, 'required' => true)
 		);
 	}
 
@@ -59,9 +59,6 @@ class SproutMailChimpPlugin extends BasePlugin
 	}
 }
 
-/**
- * @return SproutEmailService
- */
 function sproutMailChimp()
 {
 	return Craft::app()->getComponent('sproutMailChimp');

@@ -11,12 +11,10 @@ class SproutMailChimpController extends BaseController
 
 		$settings = $mailchimpPlugin->getSettings();
 
-		if (empty($mailchimp['apiKey']))
+		if (!empty($mailchimp['apiKey']))
 		{
-			$settings->addError('apiKey', Craft::t("API key cannot be blank."));
-		}
-		else
-		{
+			$settings->apiKey = $mailchimp['apiKey'];
+
 			$result = sproutMailChimp()->getValidApi($mailchimp['apiKey']);
 
 			if (!$result)
@@ -25,7 +23,7 @@ class SproutMailChimpController extends BaseController
 			}
 		}
 
-		if (!$settings->hasErrors())
+		if ($settings->validate(null, false) && $settings->hasErrors() === false)
 		{
 			$settings = craft()->plugins->savePluginSettings( $mailchimpPlugin, $mailchimp );
 		}
