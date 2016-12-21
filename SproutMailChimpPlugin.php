@@ -31,7 +31,7 @@ class SproutMailChimpPlugin extends BasePlugin
 
 	public function hasCpSection()
 	{
-		return true;
+		return false;
 	}
 
 	protected function defineSettings()
@@ -40,6 +40,12 @@ class SproutMailChimpPlugin extends BasePlugin
 			'inlineCss' => array(AttributeType::Bool, 'default' => false),
 			'apiKey'    => array(AttributeType::String, 'required' => true)
 		);
+	}
+	public function getSettingsHtml()
+	{
+		return craft()->templates->render('sproutmailchimp/settings', array(
+			'settings' => $this->getSettings()
+		));
 	}
 
 	public function registerCpRoutes()
