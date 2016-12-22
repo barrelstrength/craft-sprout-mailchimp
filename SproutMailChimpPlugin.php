@@ -34,25 +34,16 @@ class SproutMailChimpPlugin extends BasePlugin
 		return false;
 	}
 
-	protected function defineSettings()
+	protected function getSettingsModel()
 	{
-		return array(
-			'inlineCss' => array(AttributeType::Bool, 'default' => false),
-			'apiKey'    => array(AttributeType::String, 'required' => true)
-		);
+		return new SproutMailChimp_SettingsModel();
 	}
+
 	public function getSettingsHtml()
 	{
 		return craft()->templates->render('sproutmailchimp/settings', array(
 			'settings' => $this->getSettings()
 		));
-	}
-
-	public function registerCpRoutes()
-	{
-		return array(
-			'sproutmailchimp/settings' => array( 'action' => 'sproutMailChimp/editSettings' )
-		);
 	}
 
 	public function defineSproutEmailMailers()
