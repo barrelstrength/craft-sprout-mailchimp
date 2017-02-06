@@ -83,6 +83,22 @@ class SproutMailChimpMailer extends SproutEmailBaseMailer implements SproutEmail
 	}
 
 	/**
+	 * @param array $settings
+	 *
+	 * @return \Twig_Markup
+	 */
+	public function getSettingsHtml(array $settings = array())
+	{
+		$settings = isset($settings['settings']) ? $settings['settings'] : $this->getSettings();
+
+		$html = craft()->templates->render('sproutmailchimp/settings', array(
+			'settings' => $settings
+		));
+
+		return TemplateHelper::getRaw($html);
+	}
+
+	/**
 	 * Renders the recipient list UI for this mailer
 	 *
 	 * @param SproutEmail_CampaignEmailModel[]|null $values
