@@ -11,43 +11,6 @@ namespace Craft;
 class SproutMailChimpMailer extends SproutEmailBaseMailer implements SproutEmailCampaignEmailSenderInterface
 {
 	/**
-	 * @var SproutEmailMailchimpService
-	 */
-	protected $service;
-
-	/**
-	 * @throws \Exception
-	 * @return SproutEmailMailchimpService
-	 */
-	public function getService()
-	{
-		if (is_null($this->service))
-		{
-			$this->service = Craft::app()->getComponent('sproutMailChimp');
-
-			$this->service->setSettings($this->getSettings());
-
-			try
-			{
-				$client = new \Mailchimp($this->getSettings()->getAttribute('apiKey'), array('ssl_verifypeer' => false));
-
-				$this->service->setClient($client);
-			}
-			catch (\Exception $e)
-			{
-				throw $e;
-			}
-		}
-
-		return $this->service;
-	}
-
-	public function getSettings()
-	{
-		return sproutMailChimp()->getSettings();
-	}
-
-	/**
 	 * @return string
 	 */
 	public function getName()
@@ -69,17 +32,6 @@ class SproutMailChimpMailer extends SproutEmailBaseMailer implements SproutEmail
 	public function getDescription()
 	{
 		return Craft::t('Send your email campaigns via MailChimp.');
-	}
-
-	/**
-	 * @return array
-	 */
-	public function defineSettings()
-	{
-		return array(
-			'apiKey'    => array(AttributeType::String, 'required' => true),
-			'inlineCss' => array(AttributeType::String, 'default' => true),
-		);
 	}
 
 	/**
@@ -119,7 +71,7 @@ class SproutMailChimpMailer extends SproutEmailBaseMailer implements SproutEmail
 				{
 					$length = 0;
 
-					if ($lists = $this->getService()->getListStatsById($list['id']))
+					if ($lists = sproutMailChimp()->getListStatsById($list['id']))
 					{
 						$length = number_format($lists['member_count']);
 					}
@@ -161,7 +113,7 @@ class SproutMailChimpMailer extends SproutEmailBaseMailer implements SproutEmail
 	 */
 	public function getRecipientListById($id)
 	{
-		return $this->getService()->getRecipientListById($id);
+		return sproutMailChimp()->getRecipientListById($id);
 	}
 
 	/**
@@ -169,7 +121,7 @@ class SproutMailChimpMailer extends SproutEmailBaseMailer implements SproutEmail
 	 */
 	public function getRecipientLists()
 	{
-		return $this->getService()->getRecipientLists();
+		return sproutMailChimp()->getRecipientLists();
 	}
 
 	/**
@@ -222,7 +174,7 @@ class SproutMailChimpMailer extends SproutEmailBaseMailer implements SproutEmail
 		{
 			foreach ($lists as $list)
 			{
-				$current = $this->getService()->getRecipientListById($list->list);
+				$current = sproutMailChimp()->getRecipientListById($list->list);
 
 				array_push($recipientLists, $current);
 			}
@@ -279,7 +231,7 @@ class SproutMailChimpMailer extends SproutEmailBaseMailer implements SproutEmail
 			$mailChimpModel->html       = $html;
 			$mailChimpModel->text       = $text;
 
-			$sentCampaign = $this->getService()->sendCampaignEmail($mailChimpModel);
+			$sentCampaign = sproutMailChimp()->sendCampaignEmail($mailChimpModel);
 
 			$sentCampaignIds = $sentCampaign['ids'];
 

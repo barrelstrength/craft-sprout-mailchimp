@@ -18,33 +18,15 @@ class SproutMailChimpService extends BaseApplicationComponent
 	 */
 	protected $client;
 
-	/**
-	 * Loads the mail chimp library and associated dependencies
-	 */
 	public function init()
 	{
-		require_once dirname(__FILE__) . '/../vendor/autoload.php';
-	}
+		parent::init();
 
-	/**
-	 * @param Model $settings
-	 */
-	public function setSettings($settings)
-	{
-		$this->settings = $settings;
-	}
+		$settings = $this->getSettings();
 
-	/**
-	 * @param \Mailchimp $client
-	 */
-	public function setClient(\Mailchimp $client)
-	{
+		$client = new \Mailchimp($settings->getAttribute('apiKey'));
+
 		$this->client = $client;
-	}
-
-	public function getClient()
-	{
-		return $this->client;
 	}
 	/**
 	 * @return array|null
@@ -164,11 +146,13 @@ class SproutMailChimpService extends BaseApplicationComponent
 				'text' => $mailChimpModel->text
 			);
 
+			$settings = sproutMailChimp()->getSettings();
+
 			foreach ($lists as $list)
 			{
 				$options['list_id'] = $list->list;
 
-				if ($this->settings->inlineCss)
+				if ($settings->inlineCss)
 				{
 					$options['inline_css'] = true;
 				}
