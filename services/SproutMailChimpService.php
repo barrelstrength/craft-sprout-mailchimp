@@ -28,6 +28,14 @@ class SproutMailChimpService extends BaseApplicationComponent
 
 		$this->client = $client;
 	}
+
+	public function getSettings()
+	{
+		$mailchimpPlugin = craft()->plugins->getPlugin( 'sproutMailChimp' );
+
+		return $mailchimpPlugin->getSettings();
+	}
+
 	/**
 	 * @return array|null
 	 */
@@ -240,13 +248,6 @@ class SproutMailChimpService extends BaseApplicationComponent
 		{
 			throw $e;
 		}
-	}
-
-	public function getSettings()
-	{
-		$mailchimpPlugin = craft()->plugins->getPlugin( 'sproutMailChimp' );
-
-		return $mailchimpPlugin->getSettings();
 	}
 
 	public function getValidApi($apiKey)
