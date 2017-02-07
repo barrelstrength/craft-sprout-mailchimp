@@ -35,6 +35,14 @@ class SproutMailChimpMailer extends SproutEmailBaseMailer implements SproutEmail
 	}
 
 	/**
+	 * @return array
+	 */
+	public function getRecipientLists()
+	{
+		return sproutMailChimp()->getRecipientLists();
+	}
+
+	/**
 	 * Renders the recipient list UI for this mailer
 	 *
 	 * @param SproutEmail_CampaignEmailModel[]|null $values
@@ -114,14 +122,6 @@ class SproutMailChimpMailer extends SproutEmailBaseMailer implements SproutEmail
 	public function getRecipientListById($id)
 	{
 		return sproutMailChimp()->getRecipientListById($id);
-	}
-
-	/**
-	 * @return array
-	 */
-	public function getRecipientLists()
-	{
-		return sproutMailChimp()->getRecipientLists();
 	}
 
 	/**

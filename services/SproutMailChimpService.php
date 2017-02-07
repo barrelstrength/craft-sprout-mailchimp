@@ -22,9 +22,9 @@ class SproutMailChimpService extends BaseApplicationComponent
 	{
 		parent::init();
 
-		$settings = $this->getSettings();
+		$this->settings = $this->getSettings();
 
-		$client = new \Mailchimp($settings->getAttribute('apiKey'));
+		$client = new \Mailchimp($this->settings->getAttribute('apiKey'));
 
 		$this->client = $client;
 	}
@@ -146,13 +146,11 @@ class SproutMailChimpService extends BaseApplicationComponent
 				'text' => $mailChimpModel->text
 			);
 
-			$settings = sproutMailChimp()->getSettings();
-
 			foreach ($lists as $list)
 			{
 				$options['list_id'] = $list->list;
 
-				if ($settings->inlineCss)
+				if ($this->settings->inlineCss)
 				{
 					$options['inline_css'] = true;
 				}
