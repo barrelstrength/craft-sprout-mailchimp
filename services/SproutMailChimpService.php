@@ -36,6 +36,11 @@ class SproutMailChimpService extends BaseApplicationComponent
 		return $mailchimpPlugin->getSettings();
 	}
 
+	public function getSettingsUrl()
+	{
+		return UrlHelper::getCpUrl(sprintf('settings/plugins/%s', 'sproutmailchimp'));
+	}
+
 	/**
 	 * @return array|null
 	 */

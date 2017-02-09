@@ -34,28 +34,17 @@ class SproutMailChimpMailer extends SproutEmailBaseMailer implements SproutEmail
 		return Craft::t('Send your email campaigns via MailChimp.');
 	}
 
+	public function getCpSettingsUrl()
+	{
+		return sproutMailChimp()->getSettingsUrl();
+	}
+
 	/**
 	 * @return array
 	 */
 	public function getRecipientLists()
 	{
 		return sproutMailChimp()->getRecipientLists();
-	}
-
-	/**
-	 * @param array $settings
-	 *
-	 * @return \Twig_Markup
-	 */
-	public function getSettingsHtml(array $settings = array())
-	{
-		$settings = isset($settings['settings']) ? $settings['settings'] : $this->getSettings();
-
-		$html = craft()->templates->render('sproutmailchimp/settings', array(
-			'settings' => $settings
-		));
-
-		return TemplateHelper::getRaw($html);
 	}
 
 	/**
@@ -215,7 +204,6 @@ class SproutMailChimpMailer extends SproutEmailBaseMailer implements SproutEmail
 	 */
 	public function sendCampaignEmail(SproutEmail_CampaignEmailModel $campaignEmail, SproutEmail_CampaignTypeModel $campaignType)
 	{
-		$sentCampaignIds = array();
 		$response        = new SproutEmail_ResponseModel();
 
 		try
