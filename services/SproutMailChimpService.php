@@ -29,70 +29,6 @@ class SproutMailChimpService extends BaseApplicationComponent
 		$this->client = $client;
 	}
 
-	public function getSettings()
-	{
-		$mailchimpPlugin = craft()->plugins->getPlugin( 'sproutMailChimp' );
-
-		return $mailchimpPlugin->getSettings();
-	}
-
-	public function getSettingsUrl()
-	{
-		return UrlHelper::getCpUrl(sprintf('settings/plugins/%s', 'sproutmailchimp'));
-	}
-
-	/**
-	 * @return array|null
-	 */
-	public function getRecipientLists()
-	{
-		try
-		{
-			$lists = $this->client->lists->getList();
-
-			if (isset($lists['data']))
-			{
-				return $lists['data'];
-			}
-		}
-		catch (\Exception $e)
-		{
-			if ($e->getMessage() == 'API call to lists/list failed: SSL certificate problem: unable to get local issuer certificate')
-			{
-				return false;
-			}
-			else
-			{
-				return $e->getMessage();
-			}
-		}
-	}
-
-	/**
-	 * @param $id
-	 *
-	 * @throws \Exception
-	 * @return array|null
-	 */
-	public function getRecipientListById($id)
-	{
-		$params = array('list_id' => $id);
-
-		try
-		{
-			$lists = $this->client->lists->getList($params);
-
-			if (isset($lists['data']) && ($list = array_shift($lists['data'])))
-			{
-				return $list;
-			}
-		}
-		catch (\Exception $e)
-		{
-			throw $e;
-		}
-	}
-
 	public function getListStatsById($id)
 	{
 		$params = array('list_id' => $id);
@@ -111,32 +47,11 @@ class SproutMailChimpService extends BaseApplicationComponent
 		}
 	}
 
-	/**
-	 * @param $id
-	 *
-	 * @throws \Exception
-	 * @return array|null
-	 */
-	public function getRecipientsByListId($id)
-	{
-		try
-		{
-			$members = $this->client->lists->members($id);
-
-			if (isset($members['data']))
-			{
-				return $members['data'];
-			}
-		}
-		catch (\Exception $e)
-		{
-			throw $e;
-		}
-	}
-
 	public function sendCampaignEmail(SproutMailChimp_CampaignModel $mailChimpModel, $sendOnExport = true)
 	{
+		// @todo - refactor to use new $listSettings
 		$lists = $mailChimpModel->lists;
+
 		$campaignIds = array();
 
 		if ($lists && count($lists))
@@ -197,26 +112,6 @@ class SproutMailChimpService extends BaseApplicationComponent
 			}
 		}
 
-		$recipientLists = array();
-		$toEmails       = array();
-		if (is_array($lists) && count($lists))
-		{
-			foreach ($lists as $list)
-			{
-				$current = $this->getRecipientListById($list->list);
-
-				array_push($recipientLists, $current);
-			}
-		}
-
-		if (!empty($recipientLists))
-		{
-			foreach ($recipientLists as $recipientList)
-			{
-				$toEmails[] = $recipientList['name'] . " (" . $recipientList['stats']['member_count'] . ")";
-			}
-		}
-
 		$email = new EmailModel();
 
 		$email->subject   = $mailChimpModel->title;
@@ -225,9 +120,9 @@ class SproutMailChimpService extends BaseApplicationComponent
 		$email->body      = $mailChimpModel->text;
 		$email->htmlBody  = $mailChimpModel->html;
 
-		if (!empty($toEmails))
+		if (!empty($recipients))
 		{
-			$email->toEmail = implode(', ', $toEmails);
+			$email->toEmail = implode(', ', $recipients);
 		}
 
 		return array('ids' => $campaignIds, 'emailModel' => $email);
