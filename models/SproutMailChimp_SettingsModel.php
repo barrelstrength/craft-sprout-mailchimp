@@ -14,21 +14,25 @@ class SproutMailChimp_SettingsModel extends BaseModel
 
 	public function rules()
 	{
-		$rules = parent::rules();
-		$rules[] = ['apiKey', 'validateApi'];
+		$rules   = parent::rules();
+		$rules[] = ['apiKey', 'validateApiKey'];
 
 		return $rules;
 	}
 
-	public function validateApi($attribute)
+	public function validateApiKey($attribute)
 	{
 		$value = $this->$attribute;
 
-		if (empty($value)) return;
+		if (empty($value))
+		{
+			return;
+		}
 
-		$result = sproutMailChimp()->getValidApi($value);
+		$result = sproutMailChimp()->validateApiKey($value);
 
-		if (!$result) {
+		if (!$result)
+		{
 			$message = Craft::t("API key is invalid.");
 			$this->addError($attribute, $message);
 		}

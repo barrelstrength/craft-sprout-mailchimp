@@ -10,6 +10,17 @@ namespace Craft;
  */
 class SproutMailChimpMailer extends SproutEmailBaseMailer implements SproutEmailCampaignEmailSenderInterface
 {
+	public $client;
+
+	public function init()
+	{
+		$this->settings = craft()->plugins->getPlugin('sproutMailChimp')->getSettings();
+
+		$client = new \Mailchimp($this->settings->getAttribute('apiKey'));
+
+		$this->client = $client;
+	}
+
 	/**
 	 * @return string
 	 */

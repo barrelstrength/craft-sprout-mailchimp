@@ -22,7 +22,7 @@ class SproutMailChimpService extends BaseApplicationComponent
 	{
 		parent::init();
 
-		$this->settings = $this->getSettings();
+		$this->settings = craft()->plugins->getPlugin('sproutMailChimp')->getSettings();
 
 		$client = new \Mailchimp($this->settings->getAttribute('apiKey'));
 
@@ -150,7 +150,7 @@ class SproutMailChimpService extends BaseApplicationComponent
 		}
 	}
 
-	public function getValidApi($apiKey)
+	public function validateApiKey($apiKey)
 	{
 		$result = false;
 

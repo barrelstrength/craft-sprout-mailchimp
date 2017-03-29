@@ -47,7 +47,7 @@ class SproutMailChimpPlugin extends BasePlugin
 
 	public function getSettingsHtml()
 	{
-		return craft()->templates->render('sproutmailchimp/settings', array(
+		return craft()->templates->render('sproutmailchimp/_settings/plugin', array(
 			'settings' => $this->getSettings()
 		));
 	}
