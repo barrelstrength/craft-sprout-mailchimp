@@ -36,7 +36,7 @@ class SproutMailChimpPlugin extends BasePlugin
 
 	public function init()
 	{
-		// Loads the mail chimp library and associated dependencies
+		// Loads the MailChimp library and associated dependencies
 		require_once dirname(__FILE__) . '/vendor/autoload.php';
 	}
 
@@ -47,7 +47,7 @@ class SproutMailChimpPlugin extends BasePlugin
 
 	public function getSettingsHtml()
 	{
-		return craft()->templates->render('sproutmailchimp/settings', array(
+		return craft()->templates->render('sproutmailchimp/_settings/plugin', array(
 			'settings' => $this->getSettings()
 		));
 	}

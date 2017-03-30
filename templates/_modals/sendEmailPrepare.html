@@ -33,9 +33,9 @@
 			</td>
 		</tr>
 		<tr>
-			<td><strong>{{ "Recipient Lists"|t }}</strong></td>
+			<td><strong>{{ "Lists"|t }}</strong></td>
 			<td>
-				{% for list in recipientLists %}
+				{% for list in lists %}
 					<li>{{ list.name }} ({{ list.stats.member_count }})</li>
 				{% endfor %}
 			</td>
