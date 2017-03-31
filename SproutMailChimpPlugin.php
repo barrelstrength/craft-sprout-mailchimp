@@ -36,6 +36,8 @@ class SproutMailChimpPlugin extends BasePlugin
 
 	public function init()
 	{
+		parent::init();
+
 		// Loads the MailChimp library and associated dependencies
 		require_once dirname(__FILE__) . '/vendor/autoload.php';
 	}

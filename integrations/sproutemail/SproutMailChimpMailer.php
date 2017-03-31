@@ -1,6 +1,9 @@
 <?php
 namespace Craft;
 
+// Loads the MailChimp library and associated dependencies
+require_once CRAFT_PLUGINS_PATH . 'sproutmailchimp/vendor/autoload.php';
+
 /**
  * Enables you to send your campaigns using MailChimp
  *
@@ -12,9 +15,9 @@ class SproutMailChimpMailer extends SproutEmailBaseMailer implements SproutEmail
 {
 	public $client;
 
-	public function init()
+	public function __construct()
 	{
-		$this->settings = craft()->plugins->getPlugin('sproutMailChimp')->getSettings();
+		$this->settings = $this->getSettings();
 
 		$client = new \Mailchimp($this->settings->getAttribute('apiKey'));
 
@@ -116,8 +119,14 @@ class SproutMailChimpMailer extends SproutEmailBaseMailer implements SproutEmail
 			$html = sproutEmail()->renderSiteTemplateIfExists($campaignType->template, $params);
 			$text = sproutEmail()->renderSiteTemplateIfExists($campaignType->template . '.txt', $params);
 
-			// @todo - update to use new listSettings
+			$listSettings = $campaignEmail->listSettings;
+
 			$lists = array();
+
+			if (!empty($listSettings['listIds']) && is_array($listSettings['listIds']))
+			{
+				$lists = $listSettings['listIds'];
+			}
 
 			$mailChimpModel             = new SproutMailChimp_CampaignModel();
 			$mailChimpModel->title      = $campaignEmail->title;
@@ -304,11 +313,11 @@ class SproutMailChimpMailer extends SproutEmailBaseMailer implements SproutEmail
 			}
 		}
 
-		if (is_array($values) && count($values))
+		if (!empty($values['listIds']) && is_array($values['listIds']))
 		{
-			foreach ($values as $value)
+			foreach ($values['listIds'] as $value)
 			{
-				$selected[] = $value->list;
+				$selected[] = $value;
 			}
 		}
 

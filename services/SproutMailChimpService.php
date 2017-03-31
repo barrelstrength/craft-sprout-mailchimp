@@ -49,7 +49,6 @@ class SproutMailChimpService extends BaseApplicationComponent
 
 	public function sendCampaignEmail(SproutMailChimp_CampaignModel $mailChimpModel, $sendOnExport = true)
 	{
-		// @todo - refactor to use new $listSettings
 		$lists = $mailChimpModel->lists;
 
 		$campaignIds = array();
@@ -76,7 +75,7 @@ class SproutMailChimpService extends BaseApplicationComponent
 
 			foreach ($lists as $list)
 			{
-				$options['list_id'] = $list->list;
+				$options['list_id'] = $list;
 
 				if ($this->settings->inlineCss)
 				{
