@@ -13,15 +13,9 @@ require_once CRAFT_PLUGINS_PATH . 'sproutmailchimp/vendor/autoload.php';
  */
 class SproutMailChimpMailer extends SproutEmailBaseMailer implements SproutEmailCampaignEmailSenderInterface
 {
-	public $client;
-
 	public function __construct()
 	{
 		$this->settings = $this->getSettings();
-
-		$client = new \Mailchimp($this->settings->getAttribute('apiKey'));
-
-		$this->client = $client;
 	}
 
 	/**
@@ -224,7 +218,9 @@ class SproutMailChimpMailer extends SproutEmailBaseMailer implements SproutEmail
 
 		try
 		{
-			$lists = $this->client->lists->getList($params);
+			$client = new \Mailchimp($this->settings->getAttribute('apiKey'));
+
+			$lists = $client->lists->getList($params);
 
 			if (isset($lists['data']) && ($list = array_shift($lists['data'])))
 			{
@@ -244,7 +240,9 @@ class SproutMailChimpMailer extends SproutEmailBaseMailer implements SproutEmail
 	{
 		try
 		{
-			$lists = $this->client->lists->getList();
+			$client = new \Mailchimp($this->settings->getAttribute('apiKey'));
+
+			$lists = $client->lists->getList();
 
 			if (isset($lists['data']))
 			{
