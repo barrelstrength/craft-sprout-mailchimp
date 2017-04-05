@@ -159,11 +159,6 @@ class SproutMailChimpMailer extends SproutEmailBaseMailer implements SproutEmail
 		return $response;
 	}
 
-	public function includeModalResources()
-	{
-		craft()->templates->includeJsResource('sproutmailchimp/js/mailchimp.js');
-	}
-
 	/**
 	 * @param SproutEmail_CampaignEmailModel $campaignEmail
 	 * @param SproutEmail_CampaignTypeModel  $campaignType
