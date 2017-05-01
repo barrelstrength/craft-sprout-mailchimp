@@ -1,4 +1,5 @@
 <?php
+
 namespace Craft;
 
 class SproutMailChimp_CampaignModel extends BaseModel

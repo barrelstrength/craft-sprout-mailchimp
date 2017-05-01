@@ -1,4 +1,5 @@
 <?php
+
 namespace Craft;
 
 // Loads the MailChimp library and associated dependencies
