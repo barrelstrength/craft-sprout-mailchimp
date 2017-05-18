@@ -89,6 +89,20 @@ class SproutMailChimpPlugin extends BasePlugin
 			'mailchimp' => new SproutMailChimpMailer()
 		);
 	}
+
+	/**
+	 * Register our default Sprout Lists List Types
+	 *
+	 * @return array
+	 */
+	public function registerSproutListsListTypes()
+	{
+		Craft::import("plugins.sproutmailchimp.integrations.sproutlists.SproutLists_MailchimpListType");
+
+		return array(
+			new SproutLists_MailchimpListType()
+		);
+	}
 }
 
 /**
