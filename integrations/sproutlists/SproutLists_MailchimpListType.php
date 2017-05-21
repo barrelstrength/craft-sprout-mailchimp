@@ -32,7 +32,7 @@ class SproutLists_MailchimpListType extends SproutListsBaseListType
 		$client = new \Mailchimp($this->settings->getAttribute('apiKey'));
 
 		$lists = $client->lists
-			->subscribe($subscription->listHandle, array('email' => $subscription->email), null, 'html', false);
+			->subscribe($subscription->listId, array('email' => $subscription->email), null, 'html', false);
 
 		if (!empty($lists))
 		{
@@ -54,7 +54,7 @@ class SproutLists_MailchimpListType extends SproutListsBaseListType
 		$client = new \Mailchimp($this->settings->getAttribute('apiKey'));
 
 		$lists = $client->lists
-			->unsubscribe($subscription->listHandle, array('email' => $subscription->email), false, false);
+			->unsubscribe($subscription->listId, array('email' => $subscription->email), false, false);
 
 		if (!empty($lists))
 		{
@@ -82,7 +82,7 @@ class SproutLists_MailchimpListType extends SproutListsBaseListType
 			$email = array('email' => $email);
 		}
 
-		$members = $client->lists->memberInfo($subscription->listHandle, array($email));
+		$members = $client->lists->memberInfo($subscription->listId, array($email));
 
 		$subscriber = null;
 
@@ -107,9 +107,9 @@ class SproutLists_MailchimpListType extends SproutListsBaseListType
 	/**
 	 * Return all lists for a given subscriber.
 	 *
-	 * @param $criteria
+	 * @param $subscriber
 	 *
-	 * @return mixed
+	 * @return array
 	 */
 	public function getLists($subscriber)
 	{
