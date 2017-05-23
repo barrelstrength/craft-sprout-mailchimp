@@ -67,9 +67,20 @@ class SproutMailChimpMailer extends SproutEmailBaseMailer implements SproutEmail
 	 */
 	public function getSettings()
 	{
-		$plugin = craft()->plugins->getPlugin('sproutMailChimp');
+		$general = craft()->config->get('sproutEmail');
 
-		return $plugin->getSettings();
+		if ($general != null && isset($general['mailchimp']))
+		{
+			$settings = $general['mailchimp'];
+		}
+		else
+		{
+			$plugin = craft()->plugins->getPlugin('sproutMailChimp');
+
+			$settings = $plugin->getSettings()->getAttributes();
+		}
+
+		return $settings;
 	}
 
 	/**
@@ -214,7 +225,7 @@ class SproutMailChimpMailer extends SproutEmailBaseMailer implements SproutEmail
 
 		try
 		{
-			$client = new \Mailchimp($this->settings->getAttribute('apiKey'));
+			$client = new \Mailchimp($this->settings['apiKey']);
 
 			$lists = $client->lists->getList($params);
 
@@ -238,7 +249,7 @@ class SproutMailChimpMailer extends SproutEmailBaseMailer implements SproutEmail
 	{
 		try
 		{
-			$client = new \Mailchimp($this->settings->getAttribute('apiKey'));
+			$client = new \Mailchimp($this->settings['apiKey']);
 
 			$lists = $client->lists->getList();
 
