@@ -135,26 +135,42 @@ class SproutLists_MailchimpListType extends SproutListsBaseListType
 	{
 		$client = new \Mailchimp($this->settings->getAttribute('apiKey'));
 
-		$result = $client->helper->searchMembers($subscriber->email);
-
 		$lists = array();
 
-		if (!empty($result['exact_matches']['members']))
+		if ($subscriber->email == null)
 		{
-			$count = 0;
+			$result = $client->lists->getList();
 
-			foreach ($result['exact_matches']['members'] as $member)
+			if (!empty($result['data']))
 			{
-				$status = $member['status'];
-
-				// Only subscribed members are returned
-				if ($status == 'subscribed')
+				foreach ($result['data'] as $key => $data)
 				{
-					$lists[$count]['list_id'] = $member['list_id'];
-					$lists[$count]['list_name'] = $member['list_name'];
+					$lists[$key]['list_id']   = $data['id'];
+					$lists[$key]['list_name'] = $data['name'];
 				}
+			}
+		}
+		else
+		{
+			$result = $client->helper->searchMembers($subscriber->email);
 
-				$count++;
+			if (!empty($result['exact_matches']['members']))
+			{
+				$count = 0;
+
+				foreach ($result['exact_matches']['members'] as $member)
+				{
+					$status = $member['status'];
+
+					// Only subscribed members are returned
+					if ($status == 'subscribed')
+					{
+						$lists[$count]['list_id'] = $member['list_id'];
+						$lists[$count]['list_name'] = $member['list_name'];
+					}
+
+					$count++;
+				}
 			}
 		}
 
