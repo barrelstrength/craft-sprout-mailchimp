@@ -31,8 +31,15 @@ class SproutLists_MailchimpListType extends SproutListsBaseListType
 	{
 		$client = new \Mailchimp($this->settings->getAttribute('apiKey'));
 
-		$lists = $client->lists
-			->subscribe($subscription->listId, array('email' => $subscription->email), null, 'html', false);
+		try
+		{
+			$lists = $client->lists
+				->subscribe($subscription->listId, array('email' => $subscription->email), null, 'html', true);
+		}
+		catch (\Exception $exception)
+		{
+			sproutLists()->addError($exception->getMessage());
+		}
 
 		if (!empty($lists))
 		{
@@ -52,9 +59,15 @@ class SproutLists_MailchimpListType extends SproutListsBaseListType
 	public function unsubscribe($subscription)
 	{
 		$client = new \Mailchimp($this->settings->getAttribute('apiKey'));
-
-		$lists = $client->lists
-			->unsubscribe($subscription->listId, array('email' => $subscription->email), false, false);
+		try
+		{
+			$lists = $client->lists
+				->unsubscribe($subscription->listId, array('email' => $subscription->email), false, false);
+		}
+		catch (\Exception $exception)
+		{
+			sproutLists()->addError($exception->getMessage());
+		}
 
 		if (!empty($lists))
 		{
@@ -82,7 +95,14 @@ class SproutLists_MailchimpListType extends SproutListsBaseListType
 			$email = array('email' => $email);
 		}
 
-		$members = $client->lists->memberInfo($subscription->listId, array($email));
+		try
+		{
+			$members = $client->lists->memberInfo($subscription->listId, array($email));
+		}
+		catch (\Exception $exception)
+		{
+			sproutLists()->addError($exception->getMessage());
+		}
 
 		$subscriber = null;
 
