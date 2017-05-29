@@ -23,11 +23,33 @@ class SproutMailChimpService extends BaseApplicationComponent
 	{
 		parent::init();
 
-		$this->settings = craft()->plugins->getPlugin('sproutMailChimp')->getSettings();
+		$this->settings = $this->getSettings();
 
-		$client = new \Mailchimp($this->settings->getAttribute('apiKey'));
+		$client = new \Mailchimp($this->settings['apiKey']);
 
 		$this->client = $client;
+	}
+
+
+	/**
+	 * @return BaseModel
+	 */
+	public function getSettings()
+	{
+		$general = craft()->config->get('sproutEmail');
+
+		if ($general != null && isset($general['mailchimp']))
+		{
+			$settings = $general['mailchimp'];
+		}
+		else
+		{
+			$plugin = craft()->plugins->getPlugin('sproutMailChimp');
+
+			$settings = $plugin->getSettings()->getAttributes();
+		}
+
+		return $settings;
 	}
 
 	public function getListStatsById($id)
@@ -78,7 +100,7 @@ class SproutMailChimpService extends BaseApplicationComponent
 			{
 				$options['list_id'] = $list;
 
-				if ($this->settings->inlineCss)
+				if ($this->settings['inlineCss'])
 				{
 					$options['inline_css'] = true;
 				}
@@ -104,6 +126,67 @@ class SproutMailChimpService extends BaseApplicationComponent
 				try
 				{
 					$this->send($mailchimpCampaignId);
+				}
+				catch (\Exception $e)
+				{
+					throw $e;
+				}
+			}
+		}
+
+		$email = new EmailModel();
+
+		$email->subject   = $mailChimpModel->title;
+		$email->fromName  = $mailChimpModel->from_name;
+		$email->fromEmail = $mailChimpModel->from_email;
+		$email->body      = $mailChimpModel->text;
+		$email->htmlBody  = $mailChimpModel->html;
+
+		if (!empty($recipients))
+		{
+			$email->toEmail = implode(', ', $recipients);
+		}
+
+		return array('ids' => $campaignIds, 'emailModel' => $email);
+	}
+
+	public function sendTestEmail(SproutMailChimp_CampaignModel $mailChimpModel, $sendOnExport = true)
+	{
+		$campaignIds = array();
+
+		$type    = 'regular';
+		$options = array(
+			'title'      => $mailChimpModel->title,
+			'subject'    => $mailChimpModel->subject,
+			'from_name'  => $mailChimpModel->from_name,
+			'from_email' => $mailChimpModel->from_email,
+			'tracking'   => array(
+				'opens'       => true,
+				'html_clicks' => true,
+				'text_clicks' => false
+			),
+		);
+
+		$content = array(
+			'html' => $mailChimpModel->html,
+			'text' => $mailChimpModel->text
+		);
+
+		$campaignType  = $this->client->campaigns->create($type, $options, $content);
+
+		$campaignIds[] = $campaignType['id'];
+
+		$this->info($campaignType);
+
+		Craft::dd($campaignType);
+
+		if (count($campaignIds) && $sendOnExport)
+		{
+			foreach ($campaignIds as $mailchimpCampaignId)
+			{
+				try
+				{
+					//$this->send($mailchimpCampaignId);
 				}
 				catch (\Exception $e)
 				{

@@ -16,7 +16,7 @@ class SproutMailChimpMailer extends SproutEmailBaseMailer implements SproutEmail
 {
 	public function __construct()
 	{
-		$this->settings = $this->getSettings();
+		$this->settings = sproutMailChimp()->getSettings();
 	}
 
 	/**
@@ -60,27 +60,6 @@ class SproutMailChimpMailer extends SproutEmailBaseMailer implements SproutEmail
 			'inlineCss' => array(AttributeType::Bool, 'default' => false),
 			'apiKey'    => array(AttributeType::String, 'required' => true)
 		);
-	}
-
-	/**
-	 * @return BaseModel
-	 */
-	public function getSettings()
-	{
-		$general = craft()->config->get('sproutEmail');
-
-		if ($general != null && isset($general['mailchimp']))
-		{
-			$settings = $general['mailchimp'];
-		}
-		else
-		{
-			$plugin = craft()->plugins->getPlugin('sproutMailChimp');
-
-			$settings = $plugin->getSettings()->getAttributes();
-		}
-
-		return $settings;
 	}
 
 	/**
@@ -347,5 +326,56 @@ class SproutMailChimpMailer extends SproutEmailBaseMailer implements SproutEmail
 		$lists = array();
 
 		return $lists;
+	}
+
+	public function sendTestEmail(SproutEmail_CampaignEmailModel $campaignEmail, SproutEmail_CampaignTypeModel $campaignType)
+	{
+		$response = new SproutEmail_ResponseModel();
+
+		try
+		{
+			$params = array(
+				'email'     => $campaignEmail,
+				'campaign'  => $campaignType,
+				'recipient' => array(
+					'firstName' => 'First',
+					'lastName'  => 'Last',
+					'email'     => 'user@domain.com'
+				),
+
+				// @deprecate - in favor of `email` in v3
+				'entry'     => $campaignEmail
+			);
+
+			$html = sproutEmail()->renderSiteTemplateIfExists($campaignType->template, $params);
+			$text = sproutEmail()->renderSiteTemplateIfExists($campaignType->template . '.txt', $params);
+
+			$listSettings = $campaignEmail->listSettings;
+
+			$lists = array();
+
+			if (!empty($listSettings['listIds']) && is_array($listSettings['listIds']))
+			{
+				$lists = $listSettings['listIds'];
+			}
+
+			$mailChimpModel             = new SproutMailChimp_CampaignModel();
+			$mailChimpModel->title      = $campaignEmail->title;
+			$mailChimpModel->subject    = $campaignEmail->title;
+			$mailChimpModel->from_name  = $campaignEmail->fromName;
+			$mailChimpModel->from_email = $campaignEmail->fromEmail;
+			$mailChimpModel->lists      = $lists;
+			$mailChimpModel->html       = $html;
+			$mailChimpModel->text       = $text;
+
+			return sproutMailChimp()->sendTestEmail($mailChimpModel);
+		}
+		catch (\Exception $e)
+		{
+			$response->success = false;
+			$response->message = $e->getMessage();
+
+			sproutEmail()->error($e->getMessage());
+		}
 	}
 }
