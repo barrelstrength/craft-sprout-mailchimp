@@ -1,7 +1,12 @@
 {% import "_includes/forms" as forms %}
-{#{% set title = "Sprout Mailer Mailchimp" %}#}
 
-{#{% set fullPageForm = true %}#}
+{% macro configWarning(setting, file) -%}
+	{{ "This is being overridden by the {setting} config setting."|t({
+		setting: '<a href="http://craftcms.com/docs/config-settings#'~setting~'" target="_blank">'~setting~'</a>'
+	})|raw }}
+{%- endmacro %}
+
+{% from _self import configWarning %}
 
 {% block content %}
 
@@ -10,6 +15,7 @@
 		name: "apiKey",
 		instructions: "Your <a href='http://kb.mailchimp.com/accounts/management/about-api-keys' target='_blank'>API Key</a> can be found in your MailChimp Account under: Account->Extras->API Keys"|t,
 		value: settings is defined ? settings.apiKey : null,
+		warning: (craft.config.sproutEmail.mailchimp is defined ? configWarning('apiKey')),
 		errors: settings is defined ? settings.getErrors('apiKey') : null,
 		first: true,
 	}) }}
@@ -20,6 +26,7 @@
 	queries)"|t,
 		name: "inlineCss",
 		on: settings is defined ? settings.inlineCss : null,
+		warning: (craft.config.sproutEmail.mailchimp is defined ? configWarning('inlineCss')),
 		errors: settings is defined ? settings.getErrors('inlineCss') : null
 	}) }}
 
