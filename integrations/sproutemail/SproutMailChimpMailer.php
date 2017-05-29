@@ -73,7 +73,7 @@ class SproutMailChimpMailer extends SproutEmailBaseMailer implements SproutEmail
 	}
 
 	/**
-	 * @return array
+	 * @return \Twig_Markup
 	 */
 	public function getRecipientLists()
 	{
@@ -90,7 +90,7 @@ class SproutMailChimpMailer extends SproutEmailBaseMailer implements SproutEmail
 	 * @param SproutEmail_CampaignEmailModel $campaignEmail
 	 * @param SproutEmail_CampaignTypeModel  $campaignType
 	 *
-	 * @return array|void
+	 * @return SproutEmail_ResponseModel
 	 */
 	public function sendCampaignEmail(SproutEmail_CampaignEmailModel $campaignEmail, SproutEmail_CampaignTypeModel $campaignType)
 	{
@@ -227,10 +227,12 @@ class SproutMailChimpMailer extends SproutEmailBaseMailer implements SproutEmail
 		{
 			throw $e;
 		}
+
+		return null;
 	}
 
 	/**
-	 * @return bool|string
+	 * @return bool|null|string
 	 */
 	public function getLists()
 	{
@@ -256,6 +258,8 @@ class SproutMailChimpMailer extends SproutEmailBaseMailer implements SproutEmail
 				return $e->getMessage();
 			}
 		}
+
+		return null;
 	}
 
 	/**
@@ -265,7 +269,7 @@ class SproutMailChimpMailer extends SproutEmailBaseMailer implements SproutEmail
 	 *
 	 * @return string Rendered HTML content
 	 */
-	public function getListsHtml(array $values = null)
+	public function getListsHtml($values = null)
 	{
 		$lists = $this->getLists();
 
@@ -273,7 +277,7 @@ class SproutMailChimpMailer extends SproutEmailBaseMailer implements SproutEmail
 		$selected = array();
 		$errors   = array();
 
-		if (count($lists))
+		if (!empty($lists))
 		{
 			foreach ($lists as $list)
 			{
@@ -324,13 +328,11 @@ class SproutMailChimpMailer extends SproutEmailBaseMailer implements SproutEmail
 
 	/**
 	 * @param SproutEmail_CampaignEmailModel $campaignEmail
-	 * @param SproutEmail_CampaignTypeModel  $campaign
 	 *
-	 * @return array|SproutEmail_CampaignEmailModel
+	 * @return array
 	 */
 	public function prepareLists(SproutEmail_CampaignEmailModel $campaignEmail)
 	{
-		// @todo - update to use new $listSettings
 		$lists = array();
 
 		return $lists;
