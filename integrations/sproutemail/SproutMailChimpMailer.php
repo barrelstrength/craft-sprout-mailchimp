@@ -88,39 +88,7 @@ class SproutMailChimpMailer extends SproutEmailBaseMailer implements SproutEmail
 
 		try
 		{
-			$params = array(
-				'email'     => $campaignEmail,
-				'campaign'  => $campaignType,
-				'recipient' => array(
-					'firstName' => 'First',
-					'lastName'  => 'Last',
-					'email'     => 'user@domain.com'
-				),
-
-				// @deprecate - in favor of `email` in v3
-				'entry'     => $campaignEmail
-			);
-
-			$html = sproutEmail()->renderSiteTemplateIfExists($campaignType->template, $params);
-			$text = sproutEmail()->renderSiteTemplateIfExists($campaignType->template . '.txt', $params);
-
-			$listSettings = $campaignEmail->listSettings;
-
-			$lists = array();
-
-			if (!empty($listSettings['listIds']) && is_array($listSettings['listIds']))
-			{
-				$lists = $listSettings['listIds'];
-			}
-
-			$mailChimpModel             = new SproutMailChimp_CampaignModel();
-			$mailChimpModel->title      = $campaignEmail->title;
-			$mailChimpModel->subject    = $campaignEmail->title;
-			$mailChimpModel->from_name  = $campaignEmail->fromName;
-			$mailChimpModel->from_email = $campaignEmail->fromEmail;
-			$mailChimpModel->lists      = $lists;
-			$mailChimpModel->html       = $html;
-			$mailChimpModel->text       = $text;
+			$mailChimpModel = $this->prepareMailChimpModel($campaignEmail, $campaignType);
 
 			$sentCampaign = sproutMailChimp()->sendCampaignEmail($mailChimpModel);
 
@@ -148,6 +116,45 @@ class SproutMailChimpMailer extends SproutEmailBaseMailer implements SproutEmail
 		));
 
 		return $response;
+	}
+
+	private function prepareMailChimpModel(SproutEmail_CampaignEmailModel $campaignEmail, SproutEmail_CampaignTypeModel $campaignType)
+	{
+		$params = array(
+			'email'     => $campaignEmail,
+			'campaign'  => $campaignType,
+			'recipient' => array(
+				'firstName' => 'First',
+				'lastName'  => 'Last',
+				'email'     => 'user@domain.com'
+			),
+
+			// @deprecate - in favor of `email` in v3
+			'entry'     => $campaignEmail
+		);
+
+		$html = sproutEmail()->renderSiteTemplateIfExists($campaignType->template, $params);
+		$text = sproutEmail()->renderSiteTemplateIfExists($campaignType->template . '.txt', $params);
+
+		$listSettings = $campaignEmail->listSettings;
+
+		$lists = array();
+
+		if (!empty($listSettings['listIds']) && is_array($listSettings['listIds']))
+		{
+			$lists = $listSettings['listIds'];
+		}
+
+		$mailChimpModel             = new SproutMailChimp_CampaignModel();
+		$mailChimpModel->title      = $campaignEmail->title;
+		$mailChimpModel->subject    = $campaignEmail->title;
+		$mailChimpModel->from_name  = $campaignEmail->fromName;
+		$mailChimpModel->from_email = $campaignEmail->fromEmail;
+		$mailChimpModel->lists      = $lists;
+		$mailChimpModel->html       = $html;
+		$mailChimpModel->text       = $text;
+
+		return $mailChimpModel;
 	}
 
 	/**
@@ -328,47 +335,23 @@ class SproutMailChimpMailer extends SproutEmailBaseMailer implements SproutEmail
 		return $lists;
 	}
 
-	public function sendTestEmail(SproutEmail_CampaignEmailModel $campaignEmail, SproutEmail_CampaignTypeModel $campaignType)
+	public function sendTestEmail(SproutEmail_CampaignEmailModel $campaignEmail, SproutEmail_CampaignTypeModel
+	$campaignType, $emails = array())
 	{
 		$response = new SproutEmail_ResponseModel();
 
 		try
 		{
-			$params = array(
-				'email'     => $campaignEmail,
-				'campaign'  => $campaignType,
-				'recipient' => array(
-					'firstName' => 'First',
-					'lastName'  => 'Last',
-					'email'     => 'user@domain.com'
-				),
+			$mailChimpModel = $this->prepareMailChimpModel($campaignEmail, $campaignType);
 
-				// @deprecate - in favor of `email` in v3
-				'entry'     => $campaignEmail
-			);
+			$sentCampaign = sproutMailChimp()->sendTestEmail($mailChimpModel, $emails);
 
-			$html = sproutEmail()->renderSiteTemplateIfExists($campaignType->template, $params);
-			$text = sproutEmail()->renderSiteTemplateIfExists($campaignType->template . '.txt', $params);
+			$response->emailModel = $sentCampaign['emailModel'];
 
-			$listSettings = $campaignEmail->listSettings;
-
-			$lists = array();
-
-			if (!empty($listSettings['listIds']) && is_array($listSettings['listIds']))
-			{
-				$lists = $listSettings['listIds'];
-			}
-
-			$mailChimpModel             = new SproutMailChimp_CampaignModel();
-			$mailChimpModel->title      = $campaignEmail->title;
-			$mailChimpModel->subject    = $campaignEmail->title;
-			$mailChimpModel->from_name  = $campaignEmail->fromName;
-			$mailChimpModel->from_email = $campaignEmail->fromEmail;
-			$mailChimpModel->lists      = $lists;
-			$mailChimpModel->html       = $html;
-			$mailChimpModel->text       = $text;
-
-			return sproutMailChimp()->sendTestEmail($mailChimpModel);
+			$response->success = true;
+			$response->message = Craft::t('Test Campaign successfully sent to {emails}.', array(
+				'emails' => implode(", ", $emails)
+			));
 		}
 		catch (\Exception $e)
 		{
@@ -377,5 +360,13 @@ class SproutMailChimpMailer extends SproutEmailBaseMailer implements SproutEmail
 
 			sproutEmail()->error($e->getMessage());
 		}
+
+		$response->content = craft()->templates->render('sproutmailchimp/_modals/sendEmailConfirmation', array(
+			'mailer'  => $campaignEmail,
+			'success' => $response->success,
+			'message' => $response->message
+		));
+
+		return $response;
 	}
 }

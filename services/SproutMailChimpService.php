@@ -30,7 +30,6 @@ class SproutMailChimpService extends BaseApplicationComponent
 		$this->client = $client;
 	}
 
-
 	/**
 	 * @return BaseModel
 	 */
@@ -72,6 +71,76 @@ class SproutMailChimpService extends BaseApplicationComponent
 
 	public function sendCampaignEmail(SproutMailChimp_CampaignModel $mailChimpModel, $sendOnExport = true)
 	{
+		$campaignIds = $this->createCampaign($mailChimpModel);
+
+		if (count($campaignIds) && $sendOnExport)
+		{
+			foreach ($campaignIds as $mailchimpCampaignId)
+			{
+				try
+				{
+					$this->send($mailchimpCampaignId);
+				}
+				catch (\Exception $e)
+				{
+					throw $e;
+				}
+			}
+		}
+
+		$email = new EmailModel();
+
+		$email->subject   = $mailChimpModel->title;
+		$email->fromName  = $mailChimpModel->from_name;
+		$email->fromEmail = $mailChimpModel->from_email;
+		$email->body      = $mailChimpModel->text;
+		$email->htmlBody  = $mailChimpModel->html;
+
+		if (!empty($recipients))
+		{
+			$email->toEmail = implode(', ', $recipients);
+		}
+
+		return array('ids' => $campaignIds, 'emailModel' => $email);
+	}
+
+	public function sendTestEmail(SproutMailChimp_CampaignModel $mailChimpModel, $emails)
+	{
+		$campaignIds = $this->createCampaign($mailChimpModel);
+
+		if (count($campaignIds))
+		{
+			foreach ($campaignIds as $mailchimpCampaignId)
+			{
+				try
+				{
+					$this->sendTest($mailchimpCampaignId, $emails);
+				}
+				catch (\Exception $e)
+				{
+					throw $e;
+				}
+			}
+		}
+
+		$email = new EmailModel();
+
+		$email->subject   = $mailChimpModel->title;
+		$email->fromName  = $mailChimpModel->from_name;
+		$email->fromEmail = $mailChimpModel->from_email;
+		$email->body      = $mailChimpModel->text;
+		$email->htmlBody  = $mailChimpModel->html;
+
+		if (!empty($recipients))
+		{
+			$email->toEmail = implode(', ', $recipients);
+		}
+
+		return array('ids' => $campaignIds, 'emailModel' => $email);
+	}
+
+	private function createCampaign(SproutMailChimp_CampaignModel $mailChimpModel)
+	{
 		$lists = $mailChimpModel->lists;
 
 		$campaignIds = array();
@@ -108,6 +177,7 @@ class SproutMailChimpService extends BaseApplicationComponent
 				try
 				{
 					$campaignType  = $this->client->campaigns->create($type, $options, $content);
+
 					$campaignIds[] = $campaignType['id'];
 
 					$this->info($campaignType);
@@ -119,96 +189,7 @@ class SproutMailChimpService extends BaseApplicationComponent
 			}
 		}
 
-		if (count($campaignIds) && $sendOnExport)
-		{
-			foreach ($campaignIds as $mailchimpCampaignId)
-			{
-				try
-				{
-					$this->send($mailchimpCampaignId);
-				}
-				catch (\Exception $e)
-				{
-					throw $e;
-				}
-			}
-		}
-
-		$email = new EmailModel();
-
-		$email->subject   = $mailChimpModel->title;
-		$email->fromName  = $mailChimpModel->from_name;
-		$email->fromEmail = $mailChimpModel->from_email;
-		$email->body      = $mailChimpModel->text;
-		$email->htmlBody  = $mailChimpModel->html;
-
-		if (!empty($recipients))
-		{
-			$email->toEmail = implode(', ', $recipients);
-		}
-
-		return array('ids' => $campaignIds, 'emailModel' => $email);
-	}
-
-	public function sendTestEmail(SproutMailChimp_CampaignModel $mailChimpModel, $sendOnExport = true)
-	{
-		$campaignIds = array();
-
-		$type    = 'regular';
-		$options = array(
-			'title'      => $mailChimpModel->title,
-			'subject'    => $mailChimpModel->subject,
-			'from_name'  => $mailChimpModel->from_name,
-			'from_email' => $mailChimpModel->from_email,
-			'tracking'   => array(
-				'opens'       => true,
-				'html_clicks' => true,
-				'text_clicks' => false
-			),
-		);
-
-		$content = array(
-			'html' => $mailChimpModel->html,
-			'text' => $mailChimpModel->text
-		);
-
-		$campaignType  = $this->client->campaigns->create($type, $options, $content);
-
-		$campaignIds[] = $campaignType['id'];
-
-		$this->info($campaignType);
-
-		Craft::dd($campaignType);
-
-		if (count($campaignIds) && $sendOnExport)
-		{
-			foreach ($campaignIds as $mailchimpCampaignId)
-			{
-				try
-				{
-					//$this->send($mailchimpCampaignId);
-				}
-				catch (\Exception $e)
-				{
-					throw $e;
-				}
-			}
-		}
-
-		$email = new EmailModel();
-
-		$email->subject   = $mailChimpModel->title;
-		$email->fromName  = $mailChimpModel->from_name;
-		$email->fromEmail = $mailChimpModel->from_email;
-		$email->body      = $mailChimpModel->text;
-		$email->htmlBody  = $mailChimpModel->html;
-
-		if (!empty($recipients))
-		{
-			$email->toEmail = implode(', ', $recipients);
-		}
-
-		return array('ids' => $campaignIds, 'emailModel' => $email);
+		return $campaignIds;
 	}
 
 	/**
@@ -224,6 +205,20 @@ class SproutMailChimpService extends BaseApplicationComponent
 		try
 		{
 			$this->client->campaigns->send($mailchimpCampaignId);
+
+			return true;
+		}
+		catch (\Exception $e)
+		{
+			throw $e;
+		}
+	}
+
+	public function sendTest($mailchimpCampaignId, $testEmails)
+	{
+		try
+		{
+			$this->client->campaigns->sendTest($mailchimpCampaignId, $testEmails);
 
 			return true;
 		}
