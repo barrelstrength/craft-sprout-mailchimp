@@ -6,6 +6,9 @@
 
 	<table class="data fullwidth">
 		<tbody>
+			<tr style="background-color:#eee;font-size:14px;">
+				<th colspan="2">{{ 'Overview'|t }}</th>
+			</tr>
 			<tr>
 				<td><strong>{{ "Subject"|t }}</strong></td>
 				<td>{{ campaignEmail.title }}</td>
@@ -26,6 +29,17 @@
 	</table>
 	<br>
 
+	{# @todo - this logic is in multiple places. Can we move it to the model? #}
+	{% if campaignEmail.status != 'sent' or not campaignEmail.getUrl() %}
+		{# Draft Email or Email without URLs #}
+		{% set emailUrl = craft.sproutEmail.getCampaignEmailShareUrl(campaignEmail.id, campaignType.id) %}
+		{% set separator = '&' %}
+	{% else %}
+		{# Live Email with URLs #}
+		{% set emailUrl = campaignEmail.getUrl() %}
+		{% set separator = '?' %}
+	{% endif %}
+
 	<table class="data fullwidth">
 		<tbody>
 			<tr style="background-color:#eee;font-size:14px;">
@@ -36,9 +50,9 @@
 					<strong>{{ "HTML"|t }}</strong>
 				</td>
 				<td>
-					{% if craft.sproutEmail.doesSiteTemplateExist(campaignType.template) %}
-						<a href="{{ campaignEmail.getUrl() }}" title="{{ campaignEmail.title }}" target="_blank">{{ "Preview"|t }}</a>
-					{% endif %}
+					<a href="{{ cpUrl('sproutemail/campaigns/edit/' ~ campaignEmail.id) }}">{{ "Edit"|t }}</a> or
+					<a href="{{ emailUrl }}" title="{{ campaignEmail.title }}" onclick="window.open('{{ emailUrl }}', 'newwindow',
+						'width=920, height=600'); return false;">{{ "Preview"|t }}</a>
 				</td>
 			</tr>
 			<tr>
@@ -46,9 +60,9 @@
 					<strong>{{ "Text"|t }}</strong>
 				</td>
 				<td>
-					{% if craft.sproutEmail.doesSiteTemplateExist(campaignType.template) %}
-						<a href="{{ campaignEmail.getUrl() ~ '?type=text' }}" title="{{ campaignEmail.title }}" target="_blank">{{ "Preview"|t }}</a>
-					{% endif %}
+					<a href="{{ emailUrl ~ separator ~ '?type=text' }}" title="{{ campaignEmail.title }}" onclick="window.open('{{ emailUrl }}', 'newwindow',
+						'width=920, height=600'); return false;">{{
+						"Preview"|t }}</a>
 				</td>
 			</tr>
 		</tbody>
@@ -60,13 +74,20 @@
 			<tr style="background-color:#eee;font-size:14px;">
 				<th colspan="2">{{ 'Recipients'|t }}</th>
 			</tr>
-			{% for list in lists %}
 			<tr class="snapshot-recipients">
+			{% if lists|length %}
+				{% for list in lists %}
+					<td colspan="2">
+						{{ list.name }}<span class="light"><i>(</i>{{ list.stats.member_count }}<i>)</i></span>
+					</td>
+				{% endfor %}
+			{% else %}
 				<td colspan="2">
-					{{ list.name }}<span class="light"><i>(</i>{{ list.stats.member_count }}<i>)</i></span>
+					{{ "No recipients defined."|t }} <a href="{{ cpUrl('sproutemail/campaigns/edit/' ~ campaignEmail.id) }}">{{
+						"Add Recipients"|t }}</a>
 				</td>
+			{% endif %}
 			</tr>
-			{% endfor %}
 		</tbody>
 	</table>
 
