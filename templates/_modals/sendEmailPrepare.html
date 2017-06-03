@@ -96,33 +96,20 @@
 <div class="footer">
 
 	<div class="buttons right">
-		<button
+		<button {% if not campaignEmail.isReadyToTest() %}disabled{% endif %}
 			data-action="sproutEmail/campaignEmails/sendTestEmailModal"
 			data-email-id="{{ campaignEmail.id }}"
-			class="btn actions">{{ "Send Test"|t }}
+			class="btn actions {% if not campaignEmail.isReadyToTest() %}disabled{% endif %}">
+			{{ "Send Test"|t }}
 		</button>
-		<button
+		<button {% if not campaignEmail.isReadyToSend() %}disabled{% endif %}
 			data-action="sproutEmail/campaignEmails/scheduleCampaignEmail"
 			data-email-id="{{ campaignEmail.id }}"
-			class="btn submit actions">{{ "Schedule Campaign"|t }}
+			class="btn submit actions {% if not campaignEmail.isReadyToSend() %}disabled{% endif %}">
+			{{ "Schedule Campaign"|t }}
 		</button>
-
-
-		{#<button#}
-
-			{#data-action="sproutEmail/campaignEmails/sendCampaignEmail"#}
-			{#data-email-id="{{ campaignEmail.id }}"#}
-			{#data-campaign-type-id="{{ campaignType.id }}"#}
-			{#class="btn submit icon actions send-campaign">{{ "Send Campaign"|t }}#}
-		{#</button>#}
 	</div>
 	<div class="buttons left">
-		{#<button#}
-			{#data-action="sproutEmail/campaignEmails/sendCampaignEmail"#}
-			{#data-email-id="{{ campaignEmail.id }}"#}
-			{#class="btn submit icon actions send-campaign">{{ "Schedule Campaign"|t }}#}
-		{#</button>#}
-		{#<button class="btn">{{ "Send Test"|t }}</button>#}
 		<button id="cancel" class="btn">{{ "Cancel"|t }}</button>
 	</div>
 
