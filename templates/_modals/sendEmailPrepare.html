@@ -42,8 +42,9 @@
 				</td>
 				<td>
 					<a href="{{ cpUrl('sproutemail/campaigns/edit/' ~ campaignEmail.id) }}">{{ "Edit"|t }}</a> or
-					<a href="{{ emailUrl }}" title="{{ campaignEmail.title }}" onclick="window.open('{{ emailUrl }}', 'newwindow',
-						'width=920, height=600'); return false;">{{ "Preview"|t }}</a>
+					<a href="{{ emailUrl }}" title="{{ campaignEmail.title }}" data-preview-url="{{ emailUrl }}"
+						class="email-preview">{{
+						"Preview"|t }}</a>
 				</td>
 			</tr>
 			<tr>
@@ -51,9 +52,7 @@
 					<strong>{{ "Text"|t }}</strong>
 				</td>
 				<td>
-					<a href="{{ emailUrl ~ '?type=text' }}" title="{{ campaignEmail.title }}" onclick="window.open
-						('{{ emailUrl }}', 'newwindow',
-						'width=920, height=600'); return false;">{{
+					<a href="{{ emailUrl ~ '?type=text' }}" title="{{ campaignEmail.title }}" data-preview-url="{{ emailUrl }}" class="email-preview">{{
 						"Preview"|t }}</a>
 				</td>
 			</tr>
