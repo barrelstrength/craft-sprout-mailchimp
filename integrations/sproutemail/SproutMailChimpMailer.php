@@ -110,7 +110,7 @@ class SproutMailChimpMailer extends SproutEmailBaseMailer implements SproutEmail
 		}
 
 		$response->content = craft()->templates->render('sproutmailchimp/_modals/sendEmailConfirmation', array(
-			'mailer'  => $campaignEmail,
+			'email'   => $campaignEmail,
 			'success' => $response->success,
 			'message' => $response->message
 		));
@@ -335,8 +335,7 @@ class SproutMailChimpMailer extends SproutEmailBaseMailer implements SproutEmail
 		return $lists;
 	}
 
-	public function sendTestEmail(SproutEmail_CampaignEmailModel $campaignEmail, SproutEmail_CampaignTypeModel
-	$campaignType, $emails = array())
+	public function sendTestEmail(SproutEmail_CampaignEmailModel $campaignEmail, SproutEmail_CampaignTypeModel $campaignType, $emails = array())
 	{
 		$response = new SproutEmail_ResponseModel();
 
@@ -349,7 +348,7 @@ class SproutMailChimpMailer extends SproutEmailBaseMailer implements SproutEmail
 			$response->emailModel = $sentCampaign['emailModel'];
 
 			$response->success = true;
-			$response->message = Craft::t('Test Campaign successfully sent to {emails}.', array(
+			$response->message = Craft::t('Test Campaign sent to {emails}.', array(
 				'emails' => implode(", ", $emails)
 			));
 		}
@@ -362,7 +361,7 @@ class SproutMailChimpMailer extends SproutEmailBaseMailer implements SproutEmail
 		}
 
 		$response->content = craft()->templates->render('sproutmailchimp/_modals/sendEmailConfirmation', array(
-			'mailer'  => $campaignEmail,
+			'email'   => $campaignEmail,
 			'success' => $response->success,
 			'message' => $response->message
 		));
