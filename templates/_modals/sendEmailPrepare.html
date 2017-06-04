@@ -29,16 +29,7 @@
 	</table>
 	<br>
 
-	{# @todo - this logic is in multiple places. Can we move it to the model? #}
-	{% if campaignEmail.status != 'sent' or not campaignEmail.getUrl() %}
-		{# Draft Email or Email without URLs #}
-		{% set emailUrl = craft.sproutEmail.getCampaignEmailShareUrl(campaignEmail.id, campaignType.id) %}
-		{% set separator = '&' %}
-	{% else %}
-		{# Live Email with URLs #}
-		{% set emailUrl = campaignEmail.getUrl() %}
-		{% set separator = '?' %}
-	{% endif %}
+	{% set emailUrl = cpUrl('sproutemail/preview/campaign/' ~ campaignEmail.id) %}
 
 	<table class="data fullwidth">
 		<tbody>
@@ -60,7 +51,8 @@
 					<strong>{{ "Text"|t }}</strong>
 				</td>
 				<td>
-					<a href="{{ emailUrl ~ separator ~ '?type=text' }}" title="{{ campaignEmail.title }}" onclick="window.open('{{ emailUrl }}', 'newwindow',
+					<a href="{{ emailUrl ~ '?type=text' }}" title="{{ campaignEmail.title }}" onclick="window.open
+						('{{ emailUrl }}', 'newwindow',
 						'width=920, height=600'); return false;">{{
 						"Preview"|t }}</a>
 				</td>
