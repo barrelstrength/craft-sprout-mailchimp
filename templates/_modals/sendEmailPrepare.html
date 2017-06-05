@@ -88,13 +88,13 @@
 
 	<div class="buttons right">
 		<button {% if not campaignEmail.isReadyToTest() %}disabled{% endif %}
-			data-action="sproutEmail/campaignEmails/sendTestEmailModal"
+			data-action="sproutEmail/campaignEmails/prepareTestCampaignEmailModal"
 			data-email-id="{{ campaignEmail.id }}"
 			class="btn actions {% if not campaignEmail.isReadyToTest() %}disabled{% endif %}">
 			{{ "Send Test"|t }}
 		</button>
 		<button {% if not campaignEmail.isReadyToSend() %}disabled{% endif %}
-			data-action="sproutEmail/campaignEmails/scheduleCampaignEmail"
+			data-action="sproutEmail/campaignEmails/prepareScheduleCampaignEmail"
 			data-email-id="{{ campaignEmail.id }}"
 			class="btn submit actions {% if not campaignEmail.isReadyToSend() %}disabled{% endif %}">
 			{{ "Schedule Campaign"|t }}

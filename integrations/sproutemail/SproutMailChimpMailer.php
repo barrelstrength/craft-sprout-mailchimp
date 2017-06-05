@@ -109,7 +109,7 @@ class SproutMailChimpMailer extends SproutEmailBaseMailer implements SproutEmail
 			sproutEmail()->error($e->getMessage());
 		}
 
-		$response->content = craft()->templates->render('sproutmailchimp/_modals/sendEmailConfirmation', array(
+		$response->content = craft()->templates->render('sproutemail/_modals/response', array(
 			'email'   => $campaignEmail,
 			'success' => $response->success,
 			'message' => $response->message
@@ -191,11 +191,11 @@ class SproutMailChimpMailer extends SproutEmailBaseMailer implements SproutEmail
 			}
 		}
 
-		return craft()->templates->render('sproutmailchimp/_modals/sendEmailPrepare', array(
-			'mailer'        => $this,
-			'campaignEmail' => $campaignEmail,
-			'campaignType'  => $campaignType,
-			'lists'         => $lists,
+		return craft()->templates->render('sproutemail/_modals/campaigns/prepareEmailSnapshot', array(
+			'mailer'       => $this,
+			'email'        => $campaignEmail,
+			'campaignType' => $campaignType,
+			'lists'        => $lists
 		));
 	}
 
@@ -360,7 +360,7 @@ class SproutMailChimpMailer extends SproutEmailBaseMailer implements SproutEmail
 			sproutEmail()->error($e->getMessage());
 		}
 
-		$response->content = craft()->templates->render('sproutmailchimp/_modals/sendEmailConfirmation', array(
+		$response->content = craft()->templates->render('sproutemail/_modals/response', array(
 			'email'   => $campaignEmail,
 			'success' => $response->success,
 			'message' => $response->message
