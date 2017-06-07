@@ -343,7 +343,14 @@ class SproutMailChimpMailer extends SproutEmailBaseMailer implements SproutEmail
 		{
 			$mailChimpModel = $this->prepareMailChimpModel($campaignEmail, $campaignType);
 
-			$sentCampaign = sproutMailChimp()->sendTestEmail($mailChimpModel, $emails);
+			$campaignIds = array();
+
+			if ($campaignEmail->emailSettings != null AND !empty($campaignEmail->emailSettings['campaignIds']))
+			{
+				$campaignIds = $campaignEmail->emailSettings['campaignIds'];
+			}
+
+			$sentCampaign = sproutMailChimp()->sendTestEmail($mailChimpModel, $emails, $campaignIds);
 
 			$response->emailModel = $sentCampaign['emailModel'];
 

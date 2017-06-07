@@ -104,9 +104,12 @@ class SproutMailChimpService extends BaseApplicationComponent
 		return array('ids' => $campaignIds, 'emailModel' => $email);
 	}
 
-	public function sendTestEmail(SproutMailChimp_CampaignModel $mailChimpModel, $emails)
+	public function sendTestEmail(SproutMailChimp_CampaignModel $mailChimpModel, $emails, array $campaignIds)
 	{
-		$campaignIds = $this->createCampaign($mailChimpModel);
+		if (empty($campaignIds))
+		{
+			$campaignIds = $this->createCampaign($mailChimpModel);
+		}
 
 		if (count($campaignIds))
 		{
