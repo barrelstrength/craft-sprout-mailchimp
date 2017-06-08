@@ -69,11 +69,9 @@ class SproutMailChimpService extends BaseApplicationComponent
 		}
 	}
 
-	public function sendCampaignEmail(SproutMailChimp_CampaignModel $mailChimpModel, $sendOnExport = true)
+	public function sendCampaignEmail(SproutMailChimp_CampaignModel $mailChimpModel, array $campaignIds)
 	{
-		$campaignIds = $this->createCampaign($mailChimpModel);
-
-		if (count($campaignIds) && $sendOnExport)
+		if (count($campaignIds))
 		{
 			foreach ($campaignIds as $mailchimpCampaignId)
 			{
@@ -106,11 +104,6 @@ class SproutMailChimpService extends BaseApplicationComponent
 
 	public function sendTestEmail(SproutMailChimp_CampaignModel $mailChimpModel, $emails, array $campaignIds)
 	{
-		if (empty($campaignIds))
-		{
-			$campaignIds = $this->createCampaign($mailChimpModel);
-		}
-
 		if (count($campaignIds))
 		{
 			foreach ($campaignIds as $mailchimpCampaignId)
@@ -142,7 +135,7 @@ class SproutMailChimpService extends BaseApplicationComponent
 		return array('ids' => $campaignIds, 'emailModel' => $email);
 	}
 
-	private function createCampaign(SproutMailChimp_CampaignModel $mailChimpModel)
+	public function createCampaign(SproutMailChimp_CampaignModel $mailChimpModel)
 	{
 		$lists = $mailChimpModel->lists;
 
@@ -193,6 +186,57 @@ class SproutMailChimpService extends BaseApplicationComponent
 		}
 
 		return $campaignIds;
+	}
+
+	public function getCampaignIdsIfExists(array $campaignIds = array())
+	{
+		$apiIds = array();
+
+		if (!empty($campaignIds))
+		{
+			foreach ($campaignIds as $campaignId)
+			{
+				// If it returns an error it means campaign has been deleted, Do nothing instead of throwing an error.
+				try
+				{
+					$campaign  = $this->client->campaigns->ready($campaignId);
+
+					if (!empty($campaign) && $campaign['is_ready'] == true)
+					{
+						$apiIds[] = $campaignId;
+					}
+				}
+				catch (\Exception $exception)
+				{
+
+				}
+			}
+		}
+
+		return $apiIds;
+	}
+
+	public function updateCampaignContent($campaignId, $mailChimpModel)
+	{
+		$options = array(
+			'title'      => $mailChimpModel->title,
+			'subject'    => $mailChimpModel->subject,
+			'from_name'  => $mailChimpModel->from_name,
+			'from_email' => $mailChimpModel->from_email,
+			'tracking'   => array(
+				'opens'       => true,
+				'html_clicks' => true,
+				'text_clicks' => false
+			),
+		);
+
+		$content = array(
+			'html' => $mailChimpModel->html,
+			'text' => $mailChimpModel->text
+		);
+
+		$this->client->campaigns->update($campaignId, 'options', $options);
+		$this->client->campaigns->update($campaignId, 'content', $content);
 	}
 
 	/**

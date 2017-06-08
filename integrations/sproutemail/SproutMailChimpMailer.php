@@ -90,15 +90,22 @@ class SproutMailChimpMailer extends SproutEmailBaseMailer implements SproutEmail
 		{
 			$mailChimpModel = $this->prepareMailChimpModel($campaignEmail, $campaignType);
 
-			$sentCampaign = sproutMailChimp()->sendCampaignEmail($mailChimpModel);
+			$campaignIds = $this->getCampaignIds($campaignEmail, $mailChimpModel);
 
-			$sentCampaignIds = $sentCampaign['ids'];
+			$sentCampaign = sproutMailChimp()->sendCampaignEmail($mailChimpModel, $campaignIds);
+
+			if (!empty($sentCampaign['ids']))
+			{
+				sproutEmail()->campaignEmails->saveEmailSettings($campaignEmail, array(
+					'campaignIds' => $sentCampaign['ids']
+				));
+			}
 
 			$response->emailModel = $sentCampaign['emailModel'];
 
 			$response->success = true;
 			$response->message = Craft::t('Campaign successfully sent to {count} recipient lists.', array(
-				'count' => count($sentCampaignIds)
+				'count' => count($sentCampaign['ids'])
 			));
 		}
 		catch (\Exception $e)
@@ -343,14 +350,16 @@ class SproutMailChimpMailer extends SproutEmailBaseMailer implements SproutEmail
 		{
 			$mailChimpModel = $this->prepareMailChimpModel($campaignEmail, $campaignType);
 
-			$campaignIds = array();
-
-			if ($campaignEmail->emailSettings != null AND !empty($campaignEmail->emailSettings['campaignIds']))
-			{
-				$campaignIds = $campaignEmail->emailSettings['campaignIds'];
-			}
+			$campaignIds = $this->getCampaignIds($campaignEmail, $mailChimpModel);
 
 			$sentCampaign = sproutMailChimp()->sendTestEmail($mailChimpModel, $emails, $campaignIds);
+
+			if (!empty($sentCampaign['ids']))
+			{
+				sproutEmail()->campaignEmails->saveEmailSettings($campaignEmail, array(
+					'campaignIds' => $sentCampaign['ids']
+				));
+			}
 
 			$response->emailModel = $sentCampaign['emailModel'];
 
@@ -374,5 +383,34 @@ class SproutMailChimpMailer extends SproutEmailBaseMailer implements SproutEmail
 		));
 
 		return $response;
+	}
+
+	private function getCampaignIds($campaignEmail, $mailChimpModel)
+	{
+		$campaignIds = array();
+
+		if ($campaignEmail->emailSettings != null AND !empty($campaignEmail->emailSettings['campaignIds']))
+		{
+			$emailSettingsIds = $campaignEmail->emailSettings['campaignIds'];
+
+			if (!empty($emailSettingsIds))
+			{
+				$campaignIds = sproutMailChimp()->getCampaignIdsIfExists($emailSettingsIds);
+			}
+		}
+
+		if (empty($campaignIds))
+		{
+			$campaignIds = sproutMailChimp()->createCampaign($mailChimpModel);
+		}
+		else
+		{
+			foreach ($campaignIds as $campaignId)
+			{
+				sproutMailChimp()->updateCampaignContent($campaignId, $mailChimpModel);
+			}
+		}
+
+		return $campaignIds;
 	}
 }
