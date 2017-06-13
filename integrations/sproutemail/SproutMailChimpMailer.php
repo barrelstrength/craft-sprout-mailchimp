@@ -90,22 +90,27 @@ class SproutMailChimpMailer extends SproutEmailBaseMailer implements SproutEmail
 		{
 			$mailChimpModel = $this->prepareMailChimpModel($campaignEmail, $campaignType);
 
-			$campaignIds = $this->getCampaignIds($campaignEmail, $mailChimpModel);
+			// MailChimp API does not support updating of campaign if already sent so always create a campaign.
+			$campaignIds = sproutMailChimp()->createCampaign($mailChimpModel);
 
 			$sentCampaign = sproutMailChimp()->sendCampaignEmail($mailChimpModel, $campaignIds);
 
 			if (!empty($sentCampaign['ids']))
 			{
-				sproutEmail()->campaignEmails->saveEmailSettings($campaignEmail, array(
-					'campaignIds' => $sentCampaign['ids']
-				));
+				sproutEmail()->campaignEmails->saveEmailSettings($campaignEmail, '');
+			}
+
+			$listsCount = 0;
+			if (isset($campaignEmail->listSettings) && !empty($campaignEmail->listSettings['listIds']))
+			{
+				$listsCount = count($campaignEmail->listSettings['listIds']);
 			}
 
 			$response->emailModel = $sentCampaign['emailModel'];
 
 			$response->success = true;
 			$response->message = Craft::t('Campaign successfully sent to {count} recipient lists.', array(
-				'count' => count($sentCampaign['ids'])
+				'count' => $listsCount
 			));
 		}
 		catch (\Exception $e)
@@ -395,6 +400,7 @@ class SproutMailChimpMailer extends SproutEmailBaseMailer implements SproutEmail
 
 			if (!empty($emailSettingsIds))
 			{
+				// Make sure campaign is not deleted on mailchimp only include existing ones.
 				$campaignIds = sproutMailChimp()->getCampaignIdsIfExists($emailSettingsIds);
 			}
 		}

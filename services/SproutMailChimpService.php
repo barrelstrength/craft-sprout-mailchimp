@@ -106,16 +106,16 @@ class SproutMailChimpService extends BaseApplicationComponent
 	{
 		if (count($campaignIds))
 		{
-			foreach ($campaignIds as $mailchimpCampaignId)
+			// Send only one email by getting the first campaign ID for testing purpose only.
+			$firstCampaignId = $campaignIds[0];
+
+			try
 			{
-				try
-				{
-					$this->sendTest($mailchimpCampaignId, $emails);
-				}
-				catch (\Exception $e)
-				{
-					throw $e;
-				}
+				$this->client->campaigns->sendTest($firstCampaignId, $emails);
+			}
+			catch (\Exception $e)
+			{
+				throw $e;
 			}
 		}
 
@@ -252,20 +252,6 @@ class SproutMailChimpService extends BaseApplicationComponent
 		try
 		{
 			$this->client->campaigns->send($mailchimpCampaignId);
-
-			return true;
-		}
-		catch (\Exception $e)
-		{
-			throw $e;
-		}
-	}
-
-	public function sendTest($mailchimpCampaignId, $testEmails)
-	{
-		try
-		{
-			$this->client->campaigns->sendTest($mailchimpCampaignId, $testEmails);
 
 			return true;
 		}
