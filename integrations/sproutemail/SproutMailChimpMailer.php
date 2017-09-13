@@ -97,7 +97,7 @@ class SproutMailChimpMailer extends SproutEmailBaseMailer implements SproutEmail
 
 			if (!empty($sentCampaign['ids']))
 			{
-				sproutEmail()->campaignEmails->saveEmailSettings($campaignEmail, '');
+				sproutEmail()->campaignEmails->saveEmailSettings($campaignEmail);
 			}
 
 			$listsCount = 0;
@@ -111,6 +111,56 @@ class SproutMailChimpMailer extends SproutEmailBaseMailer implements SproutEmail
 			$response->success = true;
 			$response->message = Craft::t('Campaign successfully sent to {count} recipient lists.', array(
 				'count' => $listsCount
+			));
+		}
+		catch (\Exception $e)
+		{
+			$response->success = false;
+			$response->message = $e->getMessage();
+
+			sproutEmail()->error($e->getMessage());
+		}
+
+		$response->content = craft()->templates->render('sproutemail/_modals/response', array(
+			'email'   => $campaignEmail,
+			'success' => $response->success,
+			'message' => $response->message
+		));
+
+		return $response;
+	}
+
+	/**
+	 * @param SproutEmail_CampaignEmailModel $campaignEmail
+	 * @param SproutEmail_CampaignTypeModel  $campaignType
+	 * @param array                          $emails
+	 *
+	 * @return SproutEmail_ResponseModel
+	 */
+	public function sendTestEmail(SproutEmail_CampaignEmailModel $campaignEmail, SproutEmail_CampaignTypeModel $campaignType, $emails = array())
+	{
+		$response = new SproutEmail_ResponseModel();
+
+		try
+		{
+			$mailChimpModel = $this->prepareMailChimpModel($campaignEmail, $campaignType);
+
+			$campaignIds = $this->getCampaignIds($campaignEmail, $mailChimpModel);
+
+			$sentCampaign = sproutMailChimp()->sendTestEmail($mailChimpModel, $emails, $campaignIds);
+
+			if (!empty($sentCampaign['ids']))
+			{
+				sproutEmail()->campaignEmails->saveEmailSettings($campaignEmail, array(
+					'campaignIds' => $sentCampaign['ids']
+				));
+			}
+
+			$response->emailModel = $sentCampaign['emailModel'];
+
+			$response->success = true;
+			$response->message = Craft::t('Test Campaign sent to {emails}.', array(
+				'emails' => implode(", ", $emails)
 			));
 		}
 		catch (\Exception $e)
@@ -198,6 +248,7 @@ class SproutMailChimpMailer extends SproutEmailBaseMailer implements SproutEmail
 			foreach ($listSettings['listIds'] as $list)
 			{
 				$currentList = $this->getListById($list);
+				$currentList['members_count'] = $currentList['stats']['member_count'];
 
 				array_push($lists, $currentList);
 			}
@@ -345,49 +396,6 @@ class SproutMailChimpMailer extends SproutEmailBaseMailer implements SproutEmail
 		$lists = array();
 
 		return $lists;
-	}
-
-	public function sendTestEmail(SproutEmail_CampaignEmailModel $campaignEmail, SproutEmail_CampaignTypeModel $campaignType, $emails = array())
-	{
-		$response = new SproutEmail_ResponseModel();
-
-		try
-		{
-			$mailChimpModel = $this->prepareMailChimpModel($campaignEmail, $campaignType);
-
-			$campaignIds = $this->getCampaignIds($campaignEmail, $mailChimpModel);
-
-			$sentCampaign = sproutMailChimp()->sendTestEmail($mailChimpModel, $emails, $campaignIds);
-
-			if (!empty($sentCampaign['ids']))
-			{
-				sproutEmail()->campaignEmails->saveEmailSettings($campaignEmail, array(
-					'campaignIds' => $sentCampaign['ids']
-				));
-			}
-
-			$response->emailModel = $sentCampaign['emailModel'];
-
-			$response->success = true;
-			$response->message = Craft::t('Test Campaign sent to {emails}.', array(
-				'emails' => implode(", ", $emails)
-			));
-		}
-		catch (\Exception $e)
-		{
-			$response->success = false;
-			$response->message = $e->getMessage();
-
-			sproutEmail()->error($e->getMessage());
-		}
-
-		$response->content = craft()->templates->render('sproutemail/_modals/response', array(
-			'email'   => $campaignEmail,
-			'success' => $response->success,
-			'message' => $response->message
-		));
-
-		return $response;
 	}
 
 	private function getCampaignIds($campaignEmail, $mailChimpModel)
