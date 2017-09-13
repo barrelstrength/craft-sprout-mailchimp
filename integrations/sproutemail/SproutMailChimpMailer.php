@@ -247,7 +247,7 @@ class SproutMailChimpMailer extends SproutEmailBaseMailer implements SproutEmail
 		{
 			foreach ($listSettings['listIds'] as $list)
 			{
-				$currentList = $this->getListById($list);
+				$currentList                  = $this->getListById($list);
 				$currentList['members_count'] = $currentList['stats']['member_count'];
 
 				array_push($lists, $currentList);
@@ -258,7 +258,8 @@ class SproutMailChimpMailer extends SproutEmailBaseMailer implements SproutEmail
 			'mailer'       => $this,
 			'email'        => $campaignEmail,
 			'campaignType' => $campaignType,
-			'lists'        => $lists
+			'lists'        => $lists,
+			'canBeTested'  => false
 		));
 	}
 
