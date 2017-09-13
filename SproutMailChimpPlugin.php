@@ -20,7 +20,23 @@ class SproutMailChimpPlugin extends BasePlugin
 	/**
 	 * @return string
 	 */
+	public function getDescription()
+	{
+		return 'Integrate MailChimp into your Craft CMS workflow with Sprout Email.';
+	}
+
+	/**
+	 * @return string
+	 */
 	public function getVersion()
+	{
+		return '0.6.0';
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getSchemaVersion()
 	{
 		return '0.6.0';
 	}
