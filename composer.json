@@ -1,6 +1,7 @@
 {
   "name"   : "barrelstrengthdesign/sproutmailchimp",
   "require": {
-    "mailchimp/mailchimp": "2.0.6"
+    "mailchimp/mailchimp": "2.0.6",
+    "barrelstrength/sproutcore": "^1.0.0"
   }
 }

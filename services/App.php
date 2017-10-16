@@ -1,17 +1,16 @@
 <?php
 
-namespace Craft;
+namespace barrelstrength\sproutmailchimp\services;
 
-/**
- * Class SproutMailchimpService
- *
- * @package Craft
- */
-class SproutMailChimpService extends BaseApplicationComponent
+use barrelstrength\sproutemail\models\EmailMessage;
+use barrelstrength\sproutmailchimp\models\CampaignModel;
+use barrelstrength\sproutmailchimp\SproutMailChimp;
+use craft\base\Component;
+use craft\base\Model;
+use Craft;
+
+class App extends Component
 {
-	/**
-	 * @var Model
-	 */
 	protected $settings;
 
 	/**
@@ -31,11 +30,11 @@ class SproutMailChimpService extends BaseApplicationComponent
 	}
 
 	/**
-	 * @return BaseModel
+	 * @return Model
 	 */
 	public function getSettings()
 	{
-		$general = craft()->config->get('sproutEmail');
+		$general = Craft::$app->getConfig()->getGeneral()->sproutEmail;
 
 		if ($general != null && isset($general['mailchimp']))
 		{
@@ -43,7 +42,7 @@ class SproutMailChimpService extends BaseApplicationComponent
 		}
 		else
 		{
-			$plugin = craft()->plugins->getPlugin('sproutMailChimp');
+			$plugin = Craft::$app->getPlugins()->getPlugin('sproutMailChimp');
 
 			$settings = $plugin->getSettings()->getAttributes();
 		}
@@ -69,7 +68,7 @@ class SproutMailChimpService extends BaseApplicationComponent
 		}
 	}
 
-	public function sendCampaignEmail(SproutMailChimp_CampaignModel $mailChimpModel, array $campaignIds)
+	public function sendCampaignEmail(CampaignModel $mailChimpModel, array $campaignIds)
 	{
 		if (count($campaignIds))
 		{
@@ -86,7 +85,7 @@ class SproutMailChimpService extends BaseApplicationComponent
 			}
 		}
 
-		$email = new EmailModel();
+		$email = new EmailMessage();
 
 		$email->subject   = $mailChimpModel->title;
 		$email->fromName  = $mailChimpModel->from_name;
@@ -102,7 +101,7 @@ class SproutMailChimpService extends BaseApplicationComponent
 		return array('ids' => $campaignIds, 'emailModel' => $email);
 	}
 
-	public function sendTestEmail(SproutMailChimp_CampaignModel $mailChimpModel, $emails, array $campaignIds)
+	public function sendTestEmail(CampaignModel $mailChimpModel, $emails, array $campaignIds)
 	{
 		if (count($campaignIds))
 		{
@@ -119,7 +118,7 @@ class SproutMailChimpService extends BaseApplicationComponent
 			}
 		}
 
-		$email = new EmailModel();
+		$email = new EmailMessage();
 
 		$email->subject   = $mailChimpModel->title;
 		$email->fromName  = $mailChimpModel->from_name;
@@ -135,7 +134,7 @@ class SproutMailChimpService extends BaseApplicationComponent
 		return array('ids' => $campaignIds, 'emailModel' => $email);
 	}
 
-	public function createCampaign(SproutMailChimp_CampaignModel $mailChimpModel)
+	public function createCampaign(CampaignModel $mailChimpModel)
 	{
 		$lists = $mailChimpModel->lists;
 
@@ -290,6 +289,6 @@ class SproutMailChimpService extends BaseApplicationComponent
 			$message = print_r($message, true);
 		}
 
-		SproutMailChimpPlugin::log($message, LogLevel::Info);
+		SproutMailChimp::info($message);
 	}
 }

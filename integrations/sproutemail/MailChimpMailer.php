@@ -1,9 +1,10 @@
 <?php
 
-namespace Craft;
+namespace barrelstrength\sproutmailchimp\integrations\sproutemail;
 
-// Loads the MailChimp library and associated dependencies
-require_once CRAFT_PLUGINS_PATH . 'sproutmailchimp/vendor/autoload.php';
+use barrelstrength\sproutcore\contracts\sproutemail\BaseMailer;
+use barrelstrength\sproutcore\contracts\sproutemail\CampaignEmailSenderInterface;
+use barrelstrength\sproutmailchimp\SproutMailChimp;
 
 /**
  * Enables you to send your campaigns using MailChimp
@@ -12,11 +13,11 @@ require_once CRAFT_PLUGINS_PATH . 'sproutmailchimp/vendor/autoload.php';
  *
  * @package Craft
  */
-class SproutMailChimpMailer extends SproutEmailBaseMailer implements SproutEmailCampaignEmailSenderInterface
+class MailChimpMailer extends BaseMailer implements CampaignEmailSenderInterface
 {
 	public function __construct()
 	{
-		$this->settings = sproutMailChimp()->getSettings();
+		$this->settings = SproutMailChimp::getSettings();
 	}
 
 	/**
