@@ -5,6 +5,9 @@ namespace barrelstrength\sproutmailchimp\integrations\sproutemail;
 use barrelstrength\sproutcore\contracts\sproutemail\BaseMailer;
 use barrelstrength\sproutcore\contracts\sproutemail\CampaignEmailSenderInterface;
 use barrelstrength\sproutmailchimp\SproutMailChimp;
+use craft\helpers\Template;
+use craft\helpers\UrlHelper;
+use Craft;
 
 /**
  * Enables you to send your campaigns using MailChimp
@@ -17,7 +20,7 @@ class MailChimpMailer extends BaseMailer implements CampaignEmailSenderInterface
 {
 	public function __construct()
 	{
-		$this->settings = SproutMailChimp::getSettings();
+		$this->settings = SproutMailChimp::$app->getSettings();
 	}
 
 	/**
@@ -41,7 +44,7 @@ class MailChimpMailer extends BaseMailer implements CampaignEmailSenderInterface
 	 */
 	public function getDescription()
 	{
-		return Craft::t('Send your email campaigns via MailChimp.');
+		return SproutMailChimp::t('Send your email campaigns via MailChimp.');
 	}
 
 	/**
@@ -49,7 +52,7 @@ class MailChimpMailer extends BaseMailer implements CampaignEmailSenderInterface
 	 */
 	public function getCpSettingsUrl()
 	{
-		return UrlHelper::getCpUrl('settings/plugins/sproutmailchimp');
+		return UrlHelper::cpUrl('settings/plugins/sprout-mailchimp');
 	}
 
 	/**
@@ -68,13 +71,13 @@ class MailChimpMailer extends BaseMailer implements CampaignEmailSenderInterface
 	 */
 	public function getRecipientLists()
 	{
-		$settings = isset($settings['settings']) ? $settings['settings'] : $this->getSettings();
+		$settings = $this->getSettings();
 
-		$html = craft()->templates->render('sproutmailchimp/_settings/plugin', array(
+		$html = Craft::$app->getView()->renderPageTemplate('sproutmailchimp/_settings/plugin', array(
 			'settings' => $settings
 		));
 
-		return TemplateHelper::getRaw($html);
+		return Template::raw($html);
 	}
 
 	/**

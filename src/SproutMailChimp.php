@@ -4,6 +4,7 @@ namespace barrelstrength\sproutmailchimp;
 
 use barrelstrength\sproutcore\base\BaseSproutTrait;
 use barrelstrength\sproutcore\SproutCoreHelper;
+use barrelstrength\sproutmailchimp\models\Settings;
 use barrelstrength\sproutmailchimp\services\App;
 use craft\base\Plugin;
 use Craft;
@@ -18,6 +19,7 @@ class SproutMailChimp extends Plugin
 	use BaseSproutTrait;
 
 	public $hasSettings = true;
+	public $hasCpSection = true;
 
 	/**
 	 * Enable use of SproutEmail::$plugin-> in place of Craft::$app->
@@ -25,7 +27,7 @@ class SproutMailChimp extends Plugin
 	 * @var \barrelstrength\sproutmailchimp\services\App
 	 */
 	public static $app;
-	public static $pluginId = 'sprout-email';
+	public static $pluginId = 'sprout-mail-chimp';
 
 	public function init()
 	{
@@ -57,33 +59,47 @@ class SproutMailChimp extends Plugin
 	{
 		return 'Integrate MailChimp into your Craft CMS workflow with Sprout Email.';
 	}
-	//
-	//public function init()
-	//{
-	//	parent::init();
-	//
-	//	// Loads the MailChimp library and associated dependencies
-	//	require_once dirname(__FILE__) . '/vendor/autoload.php';
-	//}
-	//
-	///**
-	// * @return SproutMailChimp_SettingsModel
-	// */
-	//protected function getSettingsModel()
-	//{
-	//	return new SproutMailChimp_SettingsModel();
-	//}
-	//
-	///**
-	// * @return string
-	// */
-	//public function getSettingsHtml()
-	//{
-	//	return craft()->templates->render('sproutmailchimp/_settings/plugin', array(
-	//		'settings' => $this->getSettings()
-	//	));
-	//}
-	//
+
+	public function createSettingsModel()
+	{
+		return new Settings();
+	}
+
+
+	public function getSettingsNavItems()
+	{
+		return [
+			'settingsHeading' => [
+				'heading' => SproutMailChimp::t('Settings'),
+			],
+			'general' => [
+				'label' => SproutMailChimp::t('General'),
+				'url' => 'sprout-mailchimp/settings/general',
+				'selected' => 'general',
+				'template' => 'sprout-mailchimp/_settings/general'
+			]
+		];
+	}
+
+	public function getCpNavItem()
+	{
+		$parent = parent::getCpNavItem();
+
+		// Allow user to override plugin name in sidebar
+		if ($this->getSettings()->pluginNameOverride)
+		{
+			$parent['label'] = $this->getSettings()->pluginNameOverride;
+		}
+
+		return array_merge($parent, [
+			'subnav' => [
+				'settings' => [
+					'label' => SproutMailChimp::t('Settings'),
+					'url' => 'sprout-mailchimp/settings'
+				]
+			]
+		]);
+	}
 	///**
 	// * @return array
 	// */

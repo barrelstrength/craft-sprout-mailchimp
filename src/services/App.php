@@ -24,7 +24,14 @@ class App extends Component
 
 		$this->settings = $this->getSettings();
 
-		$client = new \Mailchimp($this->settings['apiKey']);
+		$apiKey = '';
+
+		if (isset($this->settings['apiKey']))
+		{
+			$apiKey = $this->settings['apiKey'];
+		}
+
+		$client = new \Mailchimp($apiKey);
 
 		$this->client = $client;
 	}
@@ -36,15 +43,20 @@ class App extends Component
 	{
 		$general = Craft::$app->getConfig()->getGeneral()->sproutEmail;
 
+		$settings = [];
+
 		if ($general != null && isset($general['mailchimp']))
 		{
 			$settings = $general['mailchimp'];
 		}
 		else
 		{
-			$plugin = Craft::$app->getPlugins()->getPlugin('sproutMailChimp');
+			$plugin = Craft::$app->getPlugins()->getPlugin('sprout-mail-chimp');
 
-			$settings = $plugin->getSettings()->getAttributes();
+			if ($plugin)
+			{
+				$settings = $plugin->getSettings()->getAttributes();
+			}
 		}
 
 		return $settings;

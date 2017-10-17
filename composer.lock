@@ -4,8 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "6fc94c164b128c8b9884a526e2f43bee",
-    "content-hash": "6baff9a52540a44be98d77d4f4fa4081",
+    "content-hash": "94fc2dc2dcb0842b431b07f4ded5fafa",
     "packages": [
         {
             "name": "mailchimp/mailchimp",
@@ -51,7 +50,7 @@
                 "api",
                 "email"
             ],
-            "time": "2014-10-30 20:38:12"
+            "time": "2014-10-30T20:38:12+00:00"
         }
     ],
     "packages-dev": [],
