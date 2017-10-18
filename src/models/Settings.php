@@ -11,6 +11,8 @@ class Settings extends Model
 
 	public $apiKey;
 
+	public $pluginNameOverride;
+
 	public function rules()
 	{
 		$rules   = parent::rules();
@@ -35,5 +37,20 @@ class Settings extends Model
 			$message = SproutMailChimp::t("API key is invalid.");
 			$this->addError($attribute, $message);
 		}
+	}
+
+	public function getSettingsNavItems()
+	{
+		return [
+			'settingsHeading' => [
+				'heading' => SproutMailChimp::t('Settings'),
+			],
+			'general' => [
+				'label' => SproutMailChimp::t('General'),
+				'url' => 'sprout-mail-chimp/settings/general',
+				'selected' => 'general',
+				'template' => 'sprout-mail-chimp/_settings/general'
+			]
+		];
 	}
 }

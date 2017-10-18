@@ -8,6 +8,9 @@ use barrelstrength\sproutmailchimp\models\Settings;
 use barrelstrength\sproutmailchimp\services\App;
 use craft\base\Plugin;
 use Craft;
+use craft\web\UrlManager;
+use yii\base\Event;
+use craft\events\RegisterUrlRulesEvent;
 
 /**
  * Class SproutMailchimpPlugin
@@ -42,6 +45,10 @@ class SproutMailChimp extends Plugin
 		$this->hasCpSection  = true;
 
 		self::$app = $this->get('app');
+
+		Event::on(UrlManager::class, UrlManager::EVENT_REGISTER_CP_URL_RULES, function(RegisterUrlRulesEvent $event) {
+			$event->rules = array_merge($event->rules, $this->getCpUrlRules());
+		});
 	}
 
 	/**
@@ -65,19 +72,21 @@ class SproutMailChimp extends Plugin
 		return new Settings();
 	}
 
-
-	public function getSettingsNavItems()
+	/**
+	 * @return array
+	 */
+	private function getCpUrlRules()
 	{
 		return [
-			'settingsHeading' => [
-				'heading' => SproutMailChimp::t('Settings'),
-			],
-			'general' => [
-				'label' => SproutMailChimp::t('General'),
-				'url' => 'sprout-mailchimp/settings/general',
-				'selected' => 'general',
-				'template' => 'sprout-mailchimp/_settings/general'
-			]
+			'sprout-mail-chimp'                            =>
+				'sprout-core/settings/edit-settings',
+
+			'sprout-mail-chimp/settings'                            =>
+				'sprout-core/settings/edit-settings',
+
+			'sprout-mail-chimp/settings/<settingsSectionHandle:.*>' =>
+				'sprout-core/settings/edit-settings'
+
 		];
 	}
 
