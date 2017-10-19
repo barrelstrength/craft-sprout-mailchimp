@@ -11,6 +11,8 @@ use Craft;
 use craft\web\UrlManager;
 use yii\base\Event;
 use craft\events\RegisterUrlRulesEvent;
+use craft\web\View;
+use craft\events\RegisterTemplateRootsEvent;
 
 /**
  * Class SproutMailchimpPlugin
@@ -41,10 +43,10 @@ class SproutMailChimp extends Plugin
 			'app' => App::class
 		]);
 
+		self::$app = $this->get('app');
+
 		$this->hasCpSettings = true;
 		$this->hasCpSection  = true;
-
-		self::$app = $this->get('app');
 
 		Event::on(UrlManager::class, UrlManager::EVENT_REGISTER_CP_URL_RULES, function(RegisterUrlRulesEvent $event) {
 			$event->rules = array_merge($event->rules, $this->getCpUrlRules());

@@ -49,11 +49,11 @@ class App extends Component
 		}
 		else
 		{
-			$plugin = Craft::$app->getPlugins()->getPlugin('sprout-mail-chimp');
-	
+			$plugin = SproutMailChimp::getInstance()->getSettings();
+
 			if ($plugin)
 			{
-				$settings = $plugin->getSettings()->getAttributes();
+				$settings = $plugin->getAttributes();
 			}
 		}
 
