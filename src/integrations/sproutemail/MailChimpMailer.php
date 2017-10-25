@@ -7,6 +7,8 @@ use barrelstrength\sproutcore\contracts\sproutemail\CampaignEmailSenderInterface
 use barrelstrength\sproutemail\elements\CampaignEmail;
 use barrelstrength\sproutemail\models\CampaignTypeModel;
 use barrelstrength\sproutemail\models\ResponseModel;
+use barrelstrength\sproutemail\SproutEmail;
+use barrelstrength\sproutmailchimp\models\CampaignModel;
 use barrelstrength\sproutmailchimp\SproutMailChimp;
 use craft\helpers\Template;
 use craft\helpers\UrlHelper;
@@ -74,10 +76,10 @@ class MailChimpMailer extends BaseMailer implements CampaignEmailSenderInterface
 	}
 
 	/**
-	 * @param SproutEmail_CampaignEmailModel $campaignEmail
-	 * @param SproutEmail_CampaignTypeModel  $campaignType
+	 * @param CampaignEmail     $campaignEmail
+	 * @param CampaignTypeModel $campaignType
 	 *
-	 * @return SproutEmail_ResponseModel
+	 * @return ResponseModel
 	 */
 	public function sendCampaignEmail(CampaignEmail $campaignEmail, CampaignTypeModel $campaignType)
 	{
@@ -88,25 +90,26 @@ class MailChimpMailer extends BaseMailer implements CampaignEmailSenderInterface
 			$mailChimpModel = $this->prepareMailChimpModel($campaignEmail, $campaignType);
 
 			// MailChimp API does not support updating of campaign if already sent so always create a campaign.
-			$campaignIds = sproutMailChimp()->createCampaign($mailChimpModel);
+			$campaignIds = SproutMailChimp::$app->createCampaign($mailChimpModel);
 
-			$sentCampaign = sproutMailChimp()->sendCampaignEmail($mailChimpModel, $campaignIds);
+			$sentCampaign = SproutMailChimp::$app->sendCampaignEmail($mailChimpModel, $campaignIds);
 
 			if (!empty($sentCampaign['ids']))
 			{
-				sproutEmail()->campaignEmails->saveEmailSettings($campaignEmail);
+				SproutEmail::$app->campaignEmails->saveEmailSettings($campaignEmail);
 			}
 
 			$listsCount = 0;
-			if (isset($campaignEmail->listSettings) && !empty($campaignEmail->listSettings['listIds']))
+
+			if (isset($campaignEmail->listSettings) && !empty($campaignEmail->listSettings->listIds))
 			{
-				$listsCount = count($campaignEmail->listSettings['listIds']);
+				$listsCount = count($campaignEmail->listSettings->listIds);
 			}
 
 			$response->emailModel = $sentCampaign['emailModel'];
 
 			$response->success = true;
-			$response->message = Craft::t('Campaign successfully sent to {count} recipient lists.', array(
+			$response->message = SproutMailChimp::t('Campaign successfully sent to {count} recipient lists.', array(
 				'count' => $listsCount
 			));
 		}
@@ -115,10 +118,10 @@ class MailChimpMailer extends BaseMailer implements CampaignEmailSenderInterface
 			$response->success = false;
 			$response->message = $e->getMessage();
 
-			sproutEmail()->error($e->getMessage());
+			SproutEmail::error($e->getMessage());
 		}
 
-		$response->content = craft()->templates->render('sproutemail/_modals/response', array(
+		$response->content = Craft::$app->getView()->renderTemplate('sproutemail/_modals/response', array(
 			'email'   => $campaignEmail,
 			'success' => $response->success,
 			'message' => $response->message
@@ -177,7 +180,7 @@ class MailChimpMailer extends BaseMailer implements CampaignEmailSenderInterface
 		return $response;
 	}
 
-	private function prepareMailChimpModel(SproutEmail_CampaignEmailModel $campaignEmail, SproutEmail_CampaignTypeModel $campaignType)
+	private function prepareMailChimpModel(CampaignEmail $campaignEmail, CampaignTypeModel $campaignType)
 	{
 		$params = array(
 			'email'     => $campaignEmail,
@@ -192,8 +195,8 @@ class MailChimpMailer extends BaseMailer implements CampaignEmailSenderInterface
 			'entry'     => $campaignEmail
 		);
 
-		$html = sproutEmail()->renderSiteTemplateIfExists($campaignType->template, $params);
-		$text = sproutEmail()->renderSiteTemplateIfExists($campaignType->template . '.txt', $params);
+		$html = SproutEmail::$app->renderSiteTemplateIfExists($campaignType->template, $params);
+		$text = SproutEmail::$app->renderSiteTemplateIfExists($campaignType->template . '.txt', $params);
 
 		$listSettings = $campaignEmail->listSettings;
 
@@ -204,7 +207,7 @@ class MailChimpMailer extends BaseMailer implements CampaignEmailSenderInterface
 			$lists = $listSettings['listIds'];
 		}
 
-		$mailChimpModel             = new SproutMailChimp_CampaignModel();
+		$mailChimpModel             = new CampaignModel();
 		$mailChimpModel->title      = $campaignEmail->title;
 		$mailChimpModel->subject    = $campaignEmail->title;
 		$mailChimpModel->from_name  = $campaignEmail->fromName;
@@ -217,10 +220,11 @@ class MailChimpMailer extends BaseMailer implements CampaignEmailSenderInterface
 	}
 
 	/**
-	 * @param SproutEmail_CampaignEmailModel $campaignEmail
-	 * @param SproutEmail_CampaignTypeModel  $campaignType
+	 * @param CampaignEmail     $campaignEmail
+	 * @param CampaignTypeModel $campaignType
 	 *
 	 * @return string
+	 * @throws \Exception
 	 */
 	public function getPrepareModalHtml(CampaignEmail $campaignEmail, CampaignTypeModel $campaignType)
 	{
@@ -229,20 +233,20 @@ class MailChimpMailer extends BaseMailer implements CampaignEmailSenderInterface
 			$campaignEmail->replyToEmail = $campaignEmail->fromEmail;
 		}
 
-		$listSettings = $campaignEmail->listSettings;
+		$listSettings = json_decode($campaignEmail->listSettings);
 
 		$lists = array();
 
-		if (!isset($listSettings['listIds']))
+		if (!isset($listSettings->listIds))
 		{
 			throw new \Exception(SproutMailChimp::t('No list settings found. <a href="{cpEditUrl}">Add a list</a>', array(
 				'cpEditUrl' => $campaignEmail->getCpEditUrl()
 			)));
 		}
 
-		if (is_array($listSettings['listIds']) && count($listSettings['listIds']))
+		if (is_array($listSettings->listIds) && count($listSettings->listIds))
 		{
-			foreach ($listSettings['listIds'] as $list)
+			foreach ($listSettings->listIds as $list)
 			{
 				$currentList                  = $this->getListById($list);
 				$currentList['members_count'] = $currentList['stats']['member_count'];
@@ -398,7 +402,7 @@ class MailChimpMailer extends BaseMailer implements CampaignEmailSenderInterface
 	}
 
 	/**
-	 * @param SproutEmail_CampaignEmailModel $campaignEmail
+	 * @param CampaignEmail $campaignEmail
 	 *
 	 * @return array
 	 */
