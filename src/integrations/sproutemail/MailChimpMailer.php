@@ -369,11 +369,24 @@ class MailChimpMailer extends BaseMailer implements CampaignEmailSenderInterface
 			}
 		}
 
-		if (!empty($values['listIds']) && is_array($values['listIds']))
+		if ($values)
 		{
-			foreach ($values['listIds'] as $value)
+			if (is_array($values))
 			{
-				$selected[] = $value;
+				$listIds = $values['listIds'];
+			}
+			else
+			{
+				$values = json_decode($values);
+				$listIds = $values->listIds;
+			}
+
+			if (!empty($listIds))
+			{
+				foreach ($listIds as $value)
+				{
+					$selected[] = $value;
+				}
 			}
 		}
 
