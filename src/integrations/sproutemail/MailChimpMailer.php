@@ -131,15 +131,15 @@ class MailChimpMailer extends BaseMailer implements CampaignEmailSenderInterface
 	}
 
 	/**
-	 * @param SproutEmail_CampaignEmailModel $campaignEmail
-	 * @param SproutEmail_CampaignTypeModel  $campaignType
-	 * @param array                          $emails
+	 * @param CampaignEmail     $campaignEmail
+	 * @param CampaignTypeModel $campaignType
+	 * @param array             $emails
 	 *
-	 * @return SproutEmail_ResponseModel
+	 * @return ResponseModel
 	 */
-	public function sendTestEmail(SproutEmail_CampaignEmailModel $campaignEmail, SproutEmail_CampaignTypeModel $campaignType, $emails = array())
+	public function sendTestEmail(CampaignEmail $campaignEmail, CampaignTypeModel $campaignType, $emails = array())
 	{
-		$response = new SproutEmail_ResponseModel();
+		$response = new ResponseModel();
 
 		try
 		{
@@ -147,11 +147,11 @@ class MailChimpMailer extends BaseMailer implements CampaignEmailSenderInterface
 
 			$campaignIds = $this->getCampaignIds($campaignEmail, $mailChimpModel);
 
-			$sentCampaign = sproutMailChimp()->sendTestEmail($mailChimpModel, $emails, $campaignIds);
+			$sentCampaign = SproutMailChimp::$app->sendTestEmail($mailChimpModel, $emails, $campaignIds);
 
 			if (!empty($sentCampaign['ids']))
 			{
-				sproutEmail()->campaignEmails->saveEmailSettings($campaignEmail, array(
+				SproutMailChimp::$app->campaignEmails->saveEmailSettings($campaignEmail, array(
 					'campaignIds' => $sentCampaign['ids']
 				));
 			}
@@ -159,7 +159,7 @@ class MailChimpMailer extends BaseMailer implements CampaignEmailSenderInterface
 			$response->emailModel = $sentCampaign['emailModel'];
 
 			$response->success = true;
-			$response->message = Craft::t('Test Campaign sent to {emails}.', array(
+			$response->message = SproutMailChimp::t('Test Campaign sent to {emails}.', array(
 				'emails' => implode(", ", $emails)
 			));
 		}
@@ -168,10 +168,10 @@ class MailChimpMailer extends BaseMailer implements CampaignEmailSenderInterface
 			$response->success = false;
 			$response->message = $e->getMessage();
 
-			sproutEmail()->error($e->getMessage());
+			SproutEmail::error($e->getMessage());
 		}
 
-		$response->content = craft()->templates->render('sproutemail/_modals/response', array(
+		$response->content = Craft::$app->getView()->renderTemplate('sprout-email/_modals/response', array(
 			'email'   => $campaignEmail,
 			'success' => $response->success,
 			'message' => $response->message
@@ -199,12 +199,13 @@ class MailChimpMailer extends BaseMailer implements CampaignEmailSenderInterface
 		$text = SproutEmail::$app->renderSiteTemplateIfExists($campaignType->template . '.txt', $params);
 
 		$listSettings = $campaignEmail->listSettings;
+		$listSettings = json_decode($listSettings);
 
 		$lists = array();
 
-		if (!empty($listSettings['listIds']) && is_array($listSettings['listIds']))
+		if (!empty($listSettings->listIds) && is_array($listSettings->listIds))
 		{
-			$lists = $listSettings['listIds'];
+			$lists = $listSettings->listIds;
 		}
 
 		$mailChimpModel             = new CampaignModel();
@@ -255,7 +256,7 @@ class MailChimpMailer extends BaseMailer implements CampaignEmailSenderInterface
 			}
 		}
 
-		return Craft::$app->getView()->renderTemplate('sprout-email/_modals/campaigns/prepareEmailSnapshot', array(
+		return Craft::$app->getView()->renderTemplate('sprout-email/_modals/campaigns/prepare-email-snapshot', array(
 			'mailer'       => $this,
 			'email'        => $campaignEmail,
 			'campaignType' => $campaignType,
@@ -325,11 +326,9 @@ class MailChimpMailer extends BaseMailer implements CampaignEmailSenderInterface
 	}
 
 	/**
-	 * Renders the recipient list UI for this mailer
+	 * @param null $values
 	 *
-	 * @param SproutEmail_CampaignEmailModel[]|null $values
-	 *
-	 * @return string Rendered HTML content
+	 * @return string
 	 */
 	public function getListsHtml($values = null)
 	{
@@ -424,19 +423,19 @@ class MailChimpMailer extends BaseMailer implements CampaignEmailSenderInterface
 			if (!empty($emailSettingsIds))
 			{
 				// Make sure campaign is not deleted on mailchimp only include existing ones.
-				$campaignIds = sproutMailChimp()->getCampaignIdsIfExists($emailSettingsIds);
+				$campaignIds = SproutMailChimp::$app->getCampaignIdsIfExists($emailSettingsIds);
 			}
 		}
 
 		if (empty($campaignIds))
 		{
-			$campaignIds = sproutMailChimp()->createCampaign($mailChimpModel);
+			$campaignIds = SproutMailChimp::$app->createCampaign($mailChimpModel);
 		}
 		else
 		{
 			foreach ($campaignIds as $campaignId)
 			{
-				sproutMailChimp()->updateCampaignContent($campaignId, $mailChimpModel);
+				SproutMailChimp::$app->updateCampaignContent($campaignId, $mailChimpModel);
 			}
 		}
 
