@@ -185,7 +185,7 @@ class App extends Component
 
 					$campaignIds[] = $campaignType['id'];
 
-					$this->info($campaignType);
+					SproutMailChimp::info($campaignType);
 				}
 				catch (\Exception $e)
 				{
@@ -286,19 +286,5 @@ class App extends Component
 		}
 
 		return $result;
-	}
-
-	public function info($message, array $variables = array())
-	{
-		if (is_string($message))
-		{
-			$message = Craft::t($message, $variables);
-		}
-		else
-		{
-			$message = print_r($message, true);
-		}
-
-		SproutMailChimp::info($message);
 	}
 }

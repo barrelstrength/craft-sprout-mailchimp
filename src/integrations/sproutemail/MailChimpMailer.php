@@ -121,7 +121,7 @@ class MailChimpMailer extends BaseMailer implements CampaignEmailSenderInterface
 			SproutEmail::error($e->getMessage());
 		}
 
-		$response->content = Craft::$app->getView()->renderTemplate('sproutemail/_modals/response', array(
+		$response->content = Craft::$app->getView()->renderTemplate('sprout-email/_modals/response', array(
 			'email'   => $campaignEmail,
 			'success' => $response->success,
 			'message' => $response->message
@@ -151,7 +151,7 @@ class MailChimpMailer extends BaseMailer implements CampaignEmailSenderInterface
 
 			if (!empty($sentCampaign['ids']))
 			{
-				SproutMailChimp::$app->campaignEmails->saveEmailSettings($campaignEmail, array(
+				SproutEmail::$app->campaignEmails->saveEmailSettings($campaignEmail, array(
 					'campaignIds' => $sentCampaign['ids']
 				));
 			}
