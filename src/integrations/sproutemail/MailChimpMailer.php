@@ -92,18 +92,23 @@ class MailChimpMailer extends BaseMailer implements CampaignEmailSenderInterface
 			// MailChimp API does not support updating of campaign if already sent so always create a campaign.
 			$campaignIds = SproutMailChimp::$app->createCampaign($mailChimpModel);
 
+			$listsCount = 0;
+
+			if (isset($campaignEmail->listSettings))
+			{
+				$listSettings = json_decode($campaignEmail->listSettings);
+
+				if (!empty($listSettings->listIds))
+				{
+					$listsCount = count($listSettings->listIds);
+				}
+			}
+
 			$sentCampaign = SproutMailChimp::$app->sendCampaignEmail($mailChimpModel, $campaignIds);
 
 			if (!empty($sentCampaign['ids']))
 			{
 				SproutEmail::$app->campaignEmails->saveEmailSettings($campaignEmail);
-			}
-
-			$listsCount = 0;
-
-			if (isset($campaignEmail->listSettings) && !empty($campaignEmail->listSettings->listIds))
-			{
-				$listsCount = count($campaignEmail->listSettings->listIds);
 			}
 
 			$response->emailModel = $sentCampaign['emailModel'];
