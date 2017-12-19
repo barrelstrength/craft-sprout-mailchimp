@@ -2,11 +2,11 @@
 
 namespace barrelstrength\sproutmailchimp\integrations\sproutemail;
 
-use barrelstrength\sproutcore\contracts\sproutemail\BaseMailer;
-use barrelstrength\sproutcore\contracts\sproutemail\CampaignEmailSenderInterface;
+use barrelstrength\sproutbase\contracts\sproutemail\BaseMailer;
+use barrelstrength\sproutbase\contracts\sproutemail\CampaignEmailSenderInterface;
 use barrelstrength\sproutemail\elements\CampaignEmail;
-use barrelstrength\sproutemail\models\CampaignTypeModel;
-use barrelstrength\sproutemail\models\ResponseModel;
+use barrelstrength\sproutemail\models\CampaignType;
+use barrelstrength\sproutemail\models\Response;
 use barrelstrength\sproutemail\SproutEmail;
 use barrelstrength\sproutmailchimp\models\CampaignModel;
 use barrelstrength\sproutmailchimp\SproutMailChimp;
@@ -76,14 +76,14 @@ class MailChimpMailer extends BaseMailer implements CampaignEmailSenderInterface
 	}
 
 	/**
-	 * @param CampaignEmail     $campaignEmail
-	 * @param CampaignTypeModel $campaignType
+	 * @param CampaignEmail $campaignEmail
+	 * @param CampaignType  $campaignType
 	 *
-	 * @return ResponseModel
+	 * @return Response
 	 */
-	public function sendCampaignEmail(CampaignEmail $campaignEmail, CampaignTypeModel $campaignType)
+	public function sendCampaignEmail(CampaignEmail $campaignEmail, CampaignType $campaignType)
 	{
-		$response = new ResponseModel();
+		$response = new Response();
 
 		try
 		{
@@ -136,15 +136,15 @@ class MailChimpMailer extends BaseMailer implements CampaignEmailSenderInterface
 	}
 
 	/**
-	 * @param CampaignEmail     $campaignEmail
-	 * @param CampaignTypeModel $campaignType
-	 * @param array             $emails
+	 * @param CampaignEmail $campaignEmail
+	 * @param CampaignType  $campaignType
+	 * @param array         $emails
 	 *
-	 * @return ResponseModel
+	 * @return Response
 	 */
-	public function sendTestEmail(CampaignEmail $campaignEmail, CampaignTypeModel $campaignType, $emails = array())
+	public function sendTestEmail(CampaignEmail $campaignEmail, CampaignType $campaignType, $emails = array())
 	{
-		$response = new ResponseModel();
+		$response = new Response();
 
 		try
 		{
@@ -152,21 +152,29 @@ class MailChimpMailer extends BaseMailer implements CampaignEmailSenderInterface
 
 			$campaignIds = $this->getCampaignIds($campaignEmail, $mailChimpModel);
 
-			$sentCampaign = SproutMailChimp::$app->sendTestEmail($mailChimpModel, $emails, $campaignIds);
-
-			if (!empty($sentCampaign['ids']))
+			if (empty($campaignIds))
 			{
-				SproutEmail::$app->campaignEmails->saveEmailSettings($campaignEmail, array(
-					'campaignIds' => $sentCampaign['ids']
+				$response->success = false;
+				$response->message = Craft::t('sprout-mail-chimp', "No lists selected.");
+			}
+			else
+			{
+				$sentCampaign = SproutMailChimp::$app->sendTestEmail($mailChimpModel, $emails, $campaignIds);
+
+				if (!empty($sentCampaign['ids']))
+				{
+					SproutEmail::$app->campaignEmails->saveEmailSettings($campaignEmail, array(
+						'campaignIds' => $sentCampaign['ids']
+					));
+				}
+
+				$response->emailModel = $sentCampaign['emailModel'];
+
+				$response->success = true;
+				$response->message = SproutMailChimp::t('Test Campaign sent to {emails}.', array(
+					'emails' => implode(", ", $emails)
 				));
 			}
-
-			$response->emailModel = $sentCampaign['emailModel'];
-
-			$response->success = true;
-			$response->message = SproutMailChimp::t('Test Campaign sent to {emails}.', array(
-				'emails' => implode(", ", $emails)
-			));
 		}
 		catch (\Exception $e)
 		{
@@ -185,7 +193,7 @@ class MailChimpMailer extends BaseMailer implements CampaignEmailSenderInterface
 		return $response;
 	}
 
-	private function prepareMailChimpModel(CampaignEmail $campaignEmail, CampaignTypeModel $campaignType)
+	private function prepareMailChimpModel(CampaignEmail $campaignEmail, CampaignType $campaignType)
 	{
 		$params = array(
 			'email'     => $campaignEmail,
@@ -226,13 +234,13 @@ class MailChimpMailer extends BaseMailer implements CampaignEmailSenderInterface
 	}
 
 	/**
-	 * @param CampaignEmail     $campaignEmail
-	 * @param CampaignTypeModel $campaignType
+	 * @param CampaignEmail $campaignEmail
+	 * @param CampaignType  $campaignType
 	 *
 	 * @return string
 	 * @throws \Exception
 	 */
-	public function getPrepareModalHtml(CampaignEmail $campaignEmail, CampaignTypeModel $campaignType)
+	public function getPrepareModalHtml(CampaignEmail $campaignEmail, CampaignType $campaignType)
 	{
 		if (strpos($campaignEmail->replyToEmail, '{') !== false)
 		{

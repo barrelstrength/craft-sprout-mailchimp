@@ -2,8 +2,8 @@
 
 namespace barrelstrength\sproutmailchimp;
 
-use barrelstrength\sproutcore\base\BaseSproutTrait;
-use barrelstrength\sproutcore\SproutCoreHelper;
+use barrelstrength\sproutbase\base\BaseSproutTrait;
+use barrelstrength\sproutbase\SproutBaseHelper;
 use barrelstrength\sproutmailchimp\models\Settings;
 use barrelstrength\sproutmailchimp\services\App;
 use craft\base\Plugin;
@@ -37,7 +37,7 @@ class SproutMailChimp extends Plugin
 	public function init()
 	{
 		parent::init();
-		SproutCoreHelper::registerModule();
+		SproutBaseHelper::registerModule();
 
 		$this->setComponents([
 			'app' => App::class
@@ -81,13 +81,13 @@ class SproutMailChimp extends Plugin
 	{
 		return [
 			'sprout-mail-chimp'                            =>
-				'sprout-core/settings/edit-settings',
+				'sprout-base/settings/edit-settings',
 
 			'sprout-mail-chimp/settings'                            =>
-				'sprout-core/settings/edit-settings',
+				'sprout-base/settings/edit-settings',
 
 			'sprout-mail-chimp/settings/<settingsSectionHandle:.*>' =>
-				'sprout-core/settings/edit-settings'
+				'sprout-base/settings/edit-settings'
 
 		];
 	}
