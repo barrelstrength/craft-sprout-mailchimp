@@ -106,7 +106,7 @@ class SproutMailChimp extends Plugin
 			'subnav' => [
 				'settings' => [
 					'label' => SproutMailChimp::t('Settings'),
-					'url' => 'sprout-mailchimp/settings'
+					'url' => 'sprout-mail-chimp/settings'
 				]
 			]
 		]);

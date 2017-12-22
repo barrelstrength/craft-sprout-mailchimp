@@ -57,7 +57,7 @@ class MailChimpMailer extends BaseMailer implements CampaignEmailSenderInterface
 	 */
 	public function getCpSettingsUrl()
 	{
-		return UrlHelper::cpUrl('settings/plugins/sprout-mailchimp');
+		return UrlHelper::cpUrl('sprout-mail-chimp/settings');
 	}
 
 
