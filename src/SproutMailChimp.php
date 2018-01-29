@@ -105,7 +105,7 @@ class SproutMailChimp extends Plugin
 		return array_merge($parent, [
 			'subnav' => [
 				'settings' => [
-					'label' => SproutMailChimp::t('Settings'),
+					'label' => Craft::t('sprout-mail-chimp', 'Settings'),
 					'url' => 'sprout-mail-chimp/settings'
 				]
 			]

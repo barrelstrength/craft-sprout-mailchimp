@@ -49,7 +49,7 @@ class MailChimpMailer extends BaseMailer implements CampaignEmailSenderInterface
 	 */
 	public function getDescription()
 	{
-		return SproutMailChimp::t('Send your email campaigns via MailChimp.');
+		return Craft::t('sprout-mail-chimp','Send your email campaigns via MailChimp.');
 	}
 
 	/**
@@ -114,7 +114,7 @@ class MailChimpMailer extends BaseMailer implements CampaignEmailSenderInterface
 			$response->emailModel = $sentCampaign['emailModel'];
 
 			$response->success = true;
-			$response->message = SproutMailChimp::t('Campaign successfully sent to {count} recipient lists.', array(
+			$response->message = Craft::t('sprout-mail-chimp','Campaign successfully sent to {count} recipient lists.', array(
 				'count' => $listsCount
 			));
 		}
@@ -171,7 +171,7 @@ class MailChimpMailer extends BaseMailer implements CampaignEmailSenderInterface
 				$response->emailModel = $sentCampaign['emailModel'];
 
 				$response->success = true;
-				$response->message = SproutMailChimp::t('Test Campaign sent to {emails}.', array(
+				$response->message = Craft::t('sprout-mail-chimp','Test Campaign sent to {emails}.', array(
 					'emails' => implode(", ", $emails)
 				));
 			}
@@ -253,7 +253,7 @@ class MailChimpMailer extends BaseMailer implements CampaignEmailSenderInterface
 
 		if (!isset($listSettings->listIds))
 		{
-			throw new \Exception(SproutMailChimp::t('No list settings found. <a href="{cpEditUrl}">Add a list</a>', array(
+			throw new \Exception(Craft::t('sprout-mail-chimp','No list settings found. <a href="{cpEditUrl}">Add a list</a>', array(
 				'cpEditUrl' => $campaignEmail->getCpEditUrl()
 			)));
 		}
@@ -377,11 +377,11 @@ class MailChimpMailer extends BaseMailer implements CampaignEmailSenderInterface
 		{
 			if ($lists === false)
 			{
-				$errors[] = SproutMailChimp::t('Unable to retrieve lists due to an SSL certificate problem: unable to get local issuer certificate. Please contact you server administrator or hosting support.');
+				$errors[] = Craft::t('sprout-mail-chimp','Unable to retrieve lists due to an SSL certificate problem: unable to get local issuer certificate. Please contact you server administrator or hosting support.');
 			}
 			else
 			{
-				$errors[] = SproutMailChimp::t('No lists found. Create your first list in MailChimp.');
+				$errors[] = Craft::t('sprout-mail-chimp','No lists found. Create your first list in MailChimp.');
 			}
 		}
 
