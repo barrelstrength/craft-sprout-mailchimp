@@ -19,17 +19,33 @@ class SproutMailChimpService extends BaseApplicationComponent
 	 */
 	protected $client;
 
+	protected $errors = array();
+
 	public function init()
 	{
 		parent::init();
 
 		$this->settings = $this->getSettings();
+        $client = null;
 
-		$client = new \Mailchimp($this->settings['apiKey']);
+		try {
+            $client = new \Mailchimp($this->settings['apiKey']);
+        } catch (\Exception $exception) {
+		    $this->addError($exception->getMessage());
+        }
 
 		$this->client = $client;
 	}
 
+	public function addError($message)
+    {
+        $this->errors[] = $message;
+    }
+
+    public function getErrors()
+    {
+        return $this->errors;
+    }
 	/**
 	 * @return BaseModel
 	 */
@@ -94,11 +110,6 @@ class SproutMailChimpService extends BaseApplicationComponent
 		$email->body      = $mailChimpModel->text;
 		$email->htmlBody  = $mailChimpModel->html;
 
-		if (!empty($recipients))
-		{
-			$email->toEmail = implode(', ', $recipients);
-		}
-
 		return array('ids' => $campaignIds, 'emailModel' => $email);
 	}
 
@@ -126,11 +137,6 @@ class SproutMailChimpService extends BaseApplicationComponent
 		$email->fromEmail = $mailChimpModel->from_email;
 		$email->body      = $mailChimpModel->text;
 		$email->htmlBody  = $mailChimpModel->html;
-
-		if (!empty($recipients))
-		{
-			$email->toEmail = implode(', ', $recipients);
-		}
 
 		return array('ids' => $campaignIds, 'emailModel' => $email);
 	}

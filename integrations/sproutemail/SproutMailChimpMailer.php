@@ -314,10 +314,6 @@ class SproutMailChimpMailer extends SproutEmailBaseMailer implements SproutEmail
 			{
 				return false;
 			}
-			else
-			{
-				return $e->getMessage();
-			}
 		}
 
 		return null;
@@ -337,6 +333,12 @@ class SproutMailChimpMailer extends SproutEmailBaseMailer implements SproutEmail
 		$options  = array();
 		$selected = array();
 		$errors   = array();
+
+		$serviceErrors = SproutMailChimp()->getErrors();
+
+		if (!empty($serviceErrors)) {
+		    $errors = $serviceErrors;
+        }
 
 		if (!empty($lists))
 		{
