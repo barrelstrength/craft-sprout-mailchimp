@@ -14,8 +14,6 @@ use Craft;
 use craft\web\UrlManager;
 use yii\base\Event;
 use craft\events\RegisterUrlRulesEvent;
-use craft\web\View;
-use craft\events\RegisterTemplateRootsEvent;
 
 /**
  * Class SproutMailchimpPlugin

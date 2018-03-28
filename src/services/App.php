@@ -58,6 +58,12 @@ class App extends Component
         return $settings;
     }
 
+    /**
+     * @param $id
+     *
+     * @return mixed
+     * @throws \Exception
+     */
     public function getListStatsById($id)
     {
         $params = ['list_id' => $id];
@@ -73,6 +79,13 @@ class App extends Component
         }
     }
 
+    /**
+     * @param CampaignModel $mailChimpModel
+     * @param array         $campaignIds
+     *
+     * @return array
+     * @throws \Exception
+     */
     public function sendCampaignEmail(CampaignModel $mailChimpModel, array $campaignIds)
     {
         if (count($campaignIds)) {
@@ -100,6 +113,14 @@ class App extends Component
         return ['ids' => $campaignIds, 'emailModel' => $email];
     }
 
+    /**
+     * @param CampaignModel $mailChimpModel
+     * @param               $emails
+     * @param array         $campaignIds
+     *
+     * @return array
+     * @throws \Exception
+     */
     public function sendTestEmail(CampaignModel $mailChimpModel, $emails, array $campaignIds)
     {
         if (count($campaignIds)) {
@@ -128,10 +149,16 @@ class App extends Component
         return ['ids' => $campaignIds, 'emailModel' => $email];
     }
 
+    /**
+     * @param CampaignModel $mailChimpModel
+     *
+     * @return array
+     * @throws \Exception
+     */
     public function createCampaign(CampaignModel $mailChimpModel)
     {
         $lists = $mailChimpModel->lists;
-
+        
         $campaignIds = [];
 
         if ($lists && count($lists)) {
@@ -239,10 +266,14 @@ class App extends Component
         }
     }
 
+    /**
+     * @param $apiKey
+     *
+     * @return bool|mixed
+     * @throws \Mailchimp_Error
+     */
     public function validateApiKey($apiKey)
     {
-        $result = false;
-
         $client = new \Mailchimp($apiKey, ['ssl_verifypeer' => false]);
 
         try {

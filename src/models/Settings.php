@@ -22,6 +22,11 @@ class Settings extends Model
         return $rules;
     }
 
+    /**
+     * @param $attribute
+     *
+     * @throws \Mailchimp_Error
+     */
     public function validateApiKey($attribute)
     {
         $value = $this->$attribute;

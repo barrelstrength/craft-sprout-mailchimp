@@ -6,7 +6,6 @@ use barrelstrength\sproutbase\base\TemplateTrait;
 use barrelstrength\sproutbase\contracts\sproutemail\BaseMailer;
 use barrelstrength\sproutbase\contracts\sproutemail\CampaignEmailSenderInterface;
 use barrelstrength\sproutbase\models\sproutbase\Response;
-use barrelstrength\sproutbase\SproutBase;
 use barrelstrength\sproutemail\elements\CampaignEmail;
 use barrelstrength\sproutemail\models\CampaignType;
 use barrelstrength\sproutemail\SproutEmail;
@@ -184,6 +183,13 @@ class MailChimpMailer extends BaseMailer implements CampaignEmailSenderInterface
         return $response;
     }
 
+    /**
+     * @param CampaignEmail $campaignEmail
+     * @param CampaignType  $campaignType
+     *
+     * @return CampaignModel
+     * @throws \yii\base\Exception
+     */
     private function prepareMailChimpModel(CampaignEmail $campaignEmail, CampaignType $campaignType)
     {
         $params = [
@@ -199,8 +205,8 @@ class MailChimpMailer extends BaseMailer implements CampaignEmailSenderInterface
             'entry' => $campaignEmail
         ];
 
-        $html = SproutBase::$app->renderSiteTemplateIfExists($campaignType->template, $params);
-        $text = SproutBase::$app->renderSiteTemplateIfExists($campaignType->template.'.txt', $params);
+        $html = $this->renderSiteTemplateIfExists($campaignType->template, $params);
+        $text = $this->renderSiteTemplateIfExists($campaignType->template.'.txt', $params);
 
         $listSettings = $campaignEmail->listSettings;
         $listSettings = json_decode($listSettings);
@@ -313,10 +319,12 @@ class MailChimpMailer extends BaseMailer implements CampaignEmailSenderInterface
         return null;
     }
 
+
     /**
      * @param null $values
      *
-     * @return string
+     * @return null|string
+     * @throws \Exception
      */
     public function getListsHtml($values = null)
     {
@@ -385,6 +393,13 @@ class MailChimpMailer extends BaseMailer implements CampaignEmailSenderInterface
         return $lists;
     }
 
+    /**
+     * @param $campaignEmail
+     * @param $mailChimpModel
+     *
+     * @return array
+     * @throws \Exception
+     */
     private function getCampaignIds($campaignEmail, $mailChimpModel)
     {
         $campaignIds = [];
