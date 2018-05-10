@@ -219,12 +219,13 @@ class SproutMailChimpMailer extends SproutEmailBaseMailer implements SproutEmail
 		return $mailChimpModel;
 	}
 
-	/**
-	 * @param SproutEmail_CampaignEmailModel $campaignEmail
-	 * @param SproutEmail_CampaignTypeModel  $campaignType
-	 *
-	 * @return string
-	 */
+    /**
+     * @param SproutEmail_CampaignEmailModel $campaignEmail
+     * @param SproutEmail_CampaignTypeModel  $campaignType
+     *
+     * @return mixed|string
+     * @throws Exception
+     */
 	public function getPrepareModalHtml(SproutEmail_CampaignEmailModel $campaignEmail, SproutEmail_CampaignTypeModel $campaignType)
 	{
 		if (strpos($campaignEmail->replyToEmail, '{') !== false)
@@ -254,9 +255,9 @@ class SproutMailChimpMailer extends SproutEmailBaseMailer implements SproutEmail
 			}
 		}
 
-		return craft()->templates->render('sproutemail/_modals/campaigns/prepareEmailSnapshot', array(
+		return craft()->templates->render('sproutmailchimp/_modals/sendEmailPrepare', array(
 			'mailer'       => $this,
-			'email'        => $campaignEmail,
+			'campaignEmail' => $campaignEmail,
 			'campaignType' => $campaignType,
 			'lists'        => $lists,
 			'canBeTested'  => false
