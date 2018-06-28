@@ -2,10 +2,10 @@
 
 namespace barrelstrength\sproutmailchimp\integrations\sproutemail;
 
-use barrelstrength\sproutbase\base\TemplateTrait;
-use barrelstrength\sproutbase\contracts\sproutemail\BaseMailer;
-use barrelstrength\sproutbase\contracts\sproutemail\CampaignEmailSenderInterface;
-use barrelstrength\sproutbase\models\sproutbase\Response;
+use barrelstrength\sproutbase\app\email\base\EmailTemplateTrait;
+use barrelstrength\sproutbase\app\email\base\Mailer;
+use barrelstrength\sproutbase\app\email\base\CampaignEmailSenderInterface;
+use barrelstrength\sproutbase\app\email\models\Response;
 use barrelstrength\sproutemail\elements\CampaignEmail;
 use barrelstrength\sproutemail\models\CampaignType;
 use barrelstrength\sproutemail\SproutEmail;
@@ -22,9 +22,9 @@ use Craft;
  *
  * @package Craft
  */
-class MailChimpMailer extends BaseMailer implements CampaignEmailSenderInterface
+class MailChimpMailer extends Mailer implements CampaignEmailSenderInterface
 {
-    use TemplateTrait;
+    use EmailTemplateTrait;
 
     public function __construct()
     {
@@ -139,7 +139,7 @@ class MailChimpMailer extends BaseMailer implements CampaignEmailSenderInterface
      *
      * @return Response
      */
-    public function sendTestEmail(CampaignEmail $campaignEmail, CampaignType $campaignType, array $emails = [])
+    public function sendTestCampaignEmail(CampaignEmail $campaignEmail, CampaignType $campaignType, array $emails = [])
     {
         $response = new Response();
 

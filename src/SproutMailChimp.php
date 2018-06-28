@@ -3,8 +3,8 @@
 namespace barrelstrength\sproutmailchimp;
 
 use barrelstrength\sproutbase\base\BaseSproutTrait;
-use barrelstrength\sproutbase\events\RegisterMailersEvent;
-use barrelstrength\sproutbase\services\sproutemail\Mailers;
+use barrelstrength\sproutbase\app\email\events\RegisterMailersEvent;
+use barrelstrength\sproutbase\app\email\services\Mailers;
 use barrelstrength\sproutbase\SproutBaseHelper;
 use barrelstrength\sproutmailchimp\integrations\sproutemail\MailChimpMailer;
 use barrelstrength\sproutmailchimp\models\Settings;
@@ -35,6 +35,9 @@ class SproutMailChimp extends Plugin
     public static $app;
     public static $pluginId = 'sprout-mail-chimp';
 
+    /**
+     * @throws \yii\base\InvalidConfigException
+     */
     public function init()
     {
         parent::init();
@@ -53,7 +56,7 @@ class SproutMailChimp extends Plugin
             $event->rules = array_merge($event->rules, $this->getCpUrlRules());
         });
 
-        Event::on(Mailers::class, Mailers::EVENT_REGISTER_MAILERS, function(RegisterMailersEvent $event) {
+        Event::on(Mailers::class, Mailers::EVENT_REGISTER_MAILER_TYPES, function(RegisterMailersEvent $event) {
             $event->mailers[] = new MailChimpMailer();
         });
     }
