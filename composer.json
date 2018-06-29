@@ -1,0 +1,40 @@
+{
+  "name": "barrelstrength/sprout-mail-chimp",
+  "description": "Sprout MailChimp Integration.",
+  "type": "craft-plugin",
+  "version": "3.0.0",
+  "keywords": [
+    "craft",
+    "cms",
+    "craftcms",
+    "craft-plugin",
+    "sprout reports"
+  ],
+  "license": "Barrel Strength Design LLC",
+  "authors": [
+    {
+      "name": "Barrelstrength",
+      "email": "ben@barrelstrengthdesign.com",
+      "homepage": "https://barrelstrengthdesign.com"
+    }
+  ],
+  "require": {
+    "craftcms/cms": "^3.0.0",
+    "barrelstrength/sprout-base": "^2.0.2",
+    "mailchimp/mailchimp": "^2.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "barrelstrength\\sproutmailchimp\\": "src/"
+    }
+  },
+  "extra": {
+    "name": "Sprout MailChimp",
+    "handle": "sprout-mail-chimp",
+    "schemaVersion": "3",
+    "hasSettings": true,
+    "hasCpSection": true,
+    "changelogUrl": "???",
+    "class": "barrelstrength\\sproutmailchimp\\SproutMailChimp"
+  }
+}
