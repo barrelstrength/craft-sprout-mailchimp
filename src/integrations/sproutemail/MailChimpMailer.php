@@ -36,7 +36,7 @@ class MailChimpMailer extends Mailer implements CampaignEmailSenderInterface
      */
     public function getName()
     {
-        return 'mailchimp';
+        return 'MailChimp';
     }
 
     /**

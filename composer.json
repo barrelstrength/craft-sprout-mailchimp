@@ -19,8 +19,8 @@
     }
   ],
   "require": {
-    "craftcms/cms": "^3.0.0-RC1",
-    "barrelstrength/sprout-base": "^1.0.0",
+    "craftcms/cms": "^3.0.0",
+    "barrelstrength/sprout-base": "^2.0.2",
     "mailchimp/mailchimp": "^2.0"
   },
   "autoload": {
@@ -30,7 +30,7 @@
   },
   "extra": {
     "name": "Sprout MailChimp",
-    "handle": "sproutMailChimp",
+    "handle": "sprout-mail-chimp",
     "schemaVersion": "3",
     "hasSettings": true,
     "hasCpSection": true,
