@@ -82,7 +82,9 @@ class MailChimpMailer extends Mailer implements CampaignEmailSenderInterface
      * @param CampaignEmail $campaignEmail
      * @param CampaignType  $campaignType
      *
-     * @return Response
+     * @return Response|mixed
+     * @throws \Twig_Error_Loader
+     * @throws \yii\base\Exception
      */
     public function sendCampaignEmail(CampaignEmail $campaignEmail, CampaignType $campaignType)
     {
@@ -123,7 +125,7 @@ class MailChimpMailer extends Mailer implements CampaignEmailSenderInterface
             SproutEmail::error($e->getMessage());
         }
 
-        $response->content = Craft::$app->getView()->renderTemplate('sprout-base/sproutemail/_modals/response', [
+        $response->content = Craft::$app->getView()->renderTemplate('sprout-base-email/_modals/response', [
             'email' => $campaignEmail,
             'success' => $response->success,
             'message' => $response->message
@@ -137,7 +139,9 @@ class MailChimpMailer extends Mailer implements CampaignEmailSenderInterface
      * @param CampaignType  $campaignType
      * @param array         $emails
      *
-     * @return Response
+     * @return Response|null
+     * @throws \Twig_Error_Loader
+     * @throws \yii\base\Exception
      */
     public function sendTestCampaignEmail(CampaignEmail $campaignEmail, CampaignType $campaignType, array $emails = [])
     {
@@ -174,7 +178,7 @@ class MailChimpMailer extends Mailer implements CampaignEmailSenderInterface
             SproutEmail::error($e->getMessage());
         }
 
-        $response->content = Craft::$app->getView()->renderTemplate('sprout-base/sproutemail/_modals/response', [
+        $response->content = Craft::$app->getView()->renderTemplate('sprout-base-email/_modals/response', [
             'email' => $campaignEmail,
             'success' => $response->success,
             'message' => $response->message
@@ -205,8 +209,10 @@ class MailChimpMailer extends Mailer implements CampaignEmailSenderInterface
             'entry' => $campaignEmail
         ];
 
-        $html = $this->renderSiteTemplateIfExists($campaignType->template, $params);
-        $text = $this->renderSiteTemplateIfExists($campaignType->template.'.txt', $params);
+        $content = $this->getHtmlBody($campaignEmail, $params, $campaignType);
+
+        $html = $content['html'];
+        $text = $content['body'];
 
         $listSettings = $campaignEmail->listSettings;
         $listSettings = json_decode($listSettings);
@@ -261,7 +267,7 @@ class MailChimpMailer extends Mailer implements CampaignEmailSenderInterface
             }
         }
 
-        return Craft::$app->getView()->renderTemplate('sprout-email/_modals/campaigns/prepare-email-snapshot', [
+        return Craft::$app->getView()->renderTemplate('sprout-base-email/_modals/campaigns/prepare-email-snapshot', [
             'mailer' => $this,
             'email' => $campaignEmail,
             'campaignType' => $campaignType,
