@@ -2,7 +2,7 @@
 
 namespace barrelstrength\sproutmailchimp\services;
 
-use barrelstrength\sproutbase\models\sproutemail\EmailMessage;
+use barrelstrength\sproutbase\app\email\models\Message;
 use barrelstrength\sproutmailchimp\models\CampaignModel;
 use barrelstrength\sproutmailchimp\SproutMailChimp;
 use craft\base\Component;
@@ -98,19 +98,20 @@ class App extends Component
             }
         }
 
-        $email = new EmailMessage();
+        $message = new Message();
 
-        $email->subject = $mailChimpModel->title;
-        $email->fromName = $mailChimpModel->from_name;
-        $email->fromEmail = $mailChimpModel->from_email;
-        $email->body = $mailChimpModel->text;
-        $email->htmlBody = $mailChimpModel->html;
+        $message->setSubject($mailChimpModel->title);
+        $message->setFrom([$mailChimpModel->from_email => $mailChimpModel->from_name]);
+
+        $message->setTextBody($mailChimpModel->text);
+        $message->setHtmlBody($mailChimpModel->html);
 
         if (!empty($recipients)) {
-            $email->toEmail = implode(', ', $recipients);
+            $recipients = implode(', ', $recipients);
+            $message->setTo($recipients);
         }
 
-        return ['ids' => $campaignIds, 'emailModel' => $email];
+        return ['ids' => $campaignIds, 'emailModel' => $message];
     }
 
     /**
@@ -134,19 +135,20 @@ class App extends Component
             }
         }
 
-        $email = new EmailMessage();
+        $message = new Message();
 
-        $email->subject = $mailChimpModel->title;
-        $email->fromName = $mailChimpModel->from_name;
-        $email->fromEmail = $mailChimpModel->from_email;
-        $email->body = $mailChimpModel->text;
-        $email->htmlBody = $mailChimpModel->html;
+        $message->setSubject($mailChimpModel->title);
+        $message->setFrom([$mailChimpModel->from_email => $mailChimpModel->from_name]);
+
+        $message->setTextBody($mailChimpModel->text);
+        $message->setHtmlBody($mailChimpModel->html);
 
         if (!empty($recipients)) {
-            $email->toEmail = implode(', ', $recipients);
+            $recipients = implode(', ', $recipients);
+            $message->setTo($recipients);
         }
 
-        return ['ids' => $campaignIds, 'emailModel' => $email];
+        return ['ids' => $campaignIds, 'emailModel' => $message];
     }
 
     /**
@@ -191,8 +193,6 @@ class App extends Component
                     $campaignType = $this->client->campaigns->create($type, $options, $content);
 
                     $campaignIds[] = $campaignType['id'];
-
-                    SproutMailChimp::info($campaignType);
                 } catch (\Exception $e) {
                     throw $e;
                 }
