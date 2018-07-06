@@ -340,7 +340,7 @@ class MailChimpMailer extends Mailer implements CampaignEmailSenderInterface
         $selected = [];
         $errors = [];
 
-        if (!empty($lists)) {
+        if (is_iterable($lists)) {
             foreach ($lists as $list) {
                 if (isset($list['id']) && isset($list['name'])) {
                     $length = 0;
@@ -349,7 +349,7 @@ class MailChimpMailer extends Mailer implements CampaignEmailSenderInterface
                         $length = number_format($lists['member_count']);
                     }
 
-                    $listUrl = "https://us7.admin.mailchimp.com/lists/members/?id=".$list['web_id'];
+                    $listUrl = 'https://us7.admin.mailchimp.com/lists/members/?id='.$list['web_id'];
 
                     $options[] = [
                         'label' => sprintf('<a target="_blank" href="%s">%s (%s)</a>', $listUrl, $list['name'], $length),
