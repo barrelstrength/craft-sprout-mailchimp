@@ -41,7 +41,7 @@ class App extends Component
      */
     public function getSettings()
     {
-        $general = Craft::$app->getConfig()->getGeneral()->sproutEmail;
+        $general = Craft::$app->getConfig()->getConfigFromFile('sprout-email');
 
         $settings = [];
 
