@@ -2,7 +2,6 @@
 
 namespace barrelstrength\sproutmailchimp\integrations\sproutemail;
 
-use barrelstrength\sproutbase\app\email\base\EmailTemplateTrait;
 use barrelstrength\sproutbase\app\email\base\Mailer;
 use barrelstrength\sproutbase\app\email\base\CampaignEmailSenderInterface;
 use barrelstrength\sproutbase\app\email\models\Response;
@@ -24,8 +23,6 @@ use Craft;
  */
 class MailChimpMailer extends Mailer implements CampaignEmailSenderInterface
 {
-    use EmailTemplateTrait;
-
     public function __construct()
     {
         $this->settings = SproutMailChimp::$app->getSettings();
@@ -135,6 +132,8 @@ class MailChimpMailer extends Mailer implements CampaignEmailSenderInterface
     }
 
     /**
+     * @todo - change method signature and remove $emails in favor of $campaignEmail->getRecipients()
+     *
      * @param CampaignEmail $campaignEmail
      * @param CampaignType  $campaignType
      * @param array         $emails
@@ -209,10 +208,8 @@ class MailChimpMailer extends Mailer implements CampaignEmailSenderInterface
             'entry' => $campaignEmail
         ];
 
-        $content = $this->getHtmlBody($campaignEmail, $params, $campaignType);
-
-        $html = $content['html'];
-        $text = $content['body'];
+        $html = $this->getEmailTemplateHtmlBody($campaignEmail, $params);
+        $text = $this->getEmailTemplateTextBody($campaignEmail, $params);
 
         $listSettings = $campaignEmail->listSettings;
         $listSettings = json_decode($listSettings);
@@ -340,7 +337,7 @@ class MailChimpMailer extends Mailer implements CampaignEmailSenderInterface
         $selected = [];
         $errors = [];
 
-        if (!empty($lists)) {
+        if (is_iterable($lists)) {
             foreach ($lists as $list) {
                 if (isset($list['id']) && isset($list['name'])) {
                     $length = 0;
@@ -349,7 +346,7 @@ class MailChimpMailer extends Mailer implements CampaignEmailSenderInterface
                         $length = number_format($lists['member_count']);
                     }
 
-                    $listUrl = "https://us7.admin.mailchimp.com/lists/members/?id=".$list['web_id'];
+                    $listUrl = 'https://us7.admin.mailchimp.com/lists/members/?id='.$list['web_id'];
 
                     $options[] = [
                         'label' => sprintf('<a target="_blank" href="%s">%s (%s)</a>', $listUrl, $list['name'], $length),
