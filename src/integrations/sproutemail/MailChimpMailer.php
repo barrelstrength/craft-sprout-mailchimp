@@ -17,7 +17,7 @@ use Craft;
 /**
  * Enables you to send your campaigns using MailChimp
  *
- * Class SproutMailchimpMailer
+ * Class SproutMailChimpMailer
  *
  * @package Craft
  */
@@ -191,6 +191,7 @@ class MailChimpMailer extends Mailer implements CampaignEmailSenderInterface
      * @param CampaignType  $campaignType
      *
      * @return CampaignModel
+     * @throws \Twig_Error_Loader
      * @throws \yii\base\Exception
      */
     private function prepareMailChimpModel(CampaignEmail $campaignEmail, CampaignType $campaignType)
@@ -208,8 +209,8 @@ class MailChimpMailer extends Mailer implements CampaignEmailSenderInterface
             'entry' => $campaignEmail
         ];
 
-        $html = $this->getEmailTemplateHtmlBody($campaignEmail, $params);
-        $text = $this->getEmailTemplateTextBody($campaignEmail, $params);
+        $html = $campaignEmail->getEmailTemplates()->getHtmlBody();
+        $text = $campaignEmail->getEmailTemplates()->getTextBody();
 
         $listSettings = $campaignEmail->listSettings;
         $listSettings = json_decode($listSettings);

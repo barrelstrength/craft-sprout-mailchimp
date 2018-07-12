@@ -2,7 +2,7 @@
 
 namespace barrelstrength\sproutmailchimp\services;
 
-use barrelstrength\sproutbase\app\email\models\Message;
+use craft\mail\Message;
 use barrelstrength\sproutmailchimp\models\CampaignModel;
 use barrelstrength\sproutmailchimp\SproutMailChimp;
 use craft\base\Component;
