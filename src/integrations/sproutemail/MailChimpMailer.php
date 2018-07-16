@@ -196,19 +196,6 @@ class MailChimpMailer extends Mailer implements CampaignEmailSenderInterface
      */
     private function prepareMailChimpModel(CampaignEmail $campaignEmail, CampaignType $campaignType)
     {
-        $params = [
-            'email' => $campaignEmail,
-            'campaign' => $campaignType,
-            'recipient' => [
-                'firstName' => 'First',
-                'lastName' => 'Last',
-                'email' => 'user@domain.com'
-            ],
-
-            // @deprecate - in favor of `email` in v3
-            'entry' => $campaignEmail
-        ];
-
         $html = $campaignEmail->getEmailTemplates()->getHtmlBody();
         $text = $campaignEmail->getEmailTemplates()->getTextBody();
 
