@@ -41,12 +41,12 @@ class App extends Component
      */
     public function getSettings()
     {
-        $general = Craft::$app->getConfig()->getConfigFromFile('sprout-email');
+        $file = Craft::$app->getConfig()->getConfigFromFile('sprout-email');
 
         $settings = [];
 
-        if ($general != null && isset($general['mailchimp'])) {
-            $settings = $general['mailchimp'];
+        if ($file != null && isset($file['mailchimp'])) {
+            $settings = $file['mailchimp'];
         } else {
             $plugin = SproutMailChimp::getInstance()->getSettings();
 
