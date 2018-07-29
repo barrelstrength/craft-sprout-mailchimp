@@ -30,7 +30,7 @@ class SproutMailChimpPlugin extends BasePlugin
 	 */
 	public function getVersion()
 	{
-		return '0.6.3';
+		return '0.7.0';
 	}
 
 	/**
@@ -56,6 +56,22 @@ class SproutMailChimpPlugin extends BasePlugin
 	{
 		return 'http://barrelstrengthdesign.com';
 	}
+
+    /**
+     * @return null|string
+     */
+    public function getDocumentationUrl()
+    {
+        return "https://github.com/barrelstrength/craft-sprout-mailchimp/blob/v0/README.md";
+    }
+
+    /**
+     * @return null|string
+     */
+    public function getReleaseFeedUrl()
+    {
+        return 'https://raw.githubusercontent.com/barrelstrength/craft-sprout-mailchimp/v0/releases.json';
+    }
 
 	/**
 	 * @return bool
