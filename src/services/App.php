@@ -2,7 +2,7 @@
 
 namespace barrelstrength\sproutmailchimp\services;
 
-use barrelstrength\sproutbase\app\email\models\Message;
+use craft\mail\Message;
 use barrelstrength\sproutmailchimp\models\CampaignModel;
 use barrelstrength\sproutmailchimp\SproutMailChimp;
 use craft\base\Component;
@@ -41,12 +41,12 @@ class App extends Component
      */
     public function getSettings()
     {
-        $general = Craft::$app->getConfig()->getConfigFromFile('sprout-email');
+        $file = Craft::$app->getConfig()->getConfigFromFile('sprout-email');
 
         $settings = [];
 
-        if ($general != null && isset($general['mailchimp'])) {
-            $settings = $general['mailchimp'];
+        if ($file != null && isset($file['mailchimp'])) {
+            $settings = $file['mailchimp'];
         } else {
             $plugin = SproutMailChimp::getInstance()->getSettings();
 
