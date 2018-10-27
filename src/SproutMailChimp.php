@@ -89,13 +89,13 @@ class SproutMailChimp extends Plugin
     {
         return [
             'sprout-mail-chimp' =>
-                'sprout-base/settings/edit-settings',
+                'sprout/settings/edit-settings',
 
             'sprout-mail-chimp/settings' =>
-                'sprout-base/settings/edit-settings',
+                'sprout/settings/edit-settings',
 
             'sprout-mail-chimp/settings/<settingsSectionHandle:.*>' =>
-                'sprout-base/settings/edit-settings'
+                'sprout/settings/edit-settings'
 
         ];
     }
