@@ -20,7 +20,7 @@
   ],
   "require": {
     "craftcms/cms": "^3.0.0",
-    "barrelstrength/sprout-base": "^2.0.2",
+    "barrelstrength/sprout-base": "^4.0.0",
     "mailchimp/mailchimp": "^2.0"
   },
   "autoload": {
