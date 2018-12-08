@@ -19,6 +19,9 @@ use craft\events\RegisterUrlRulesEvent;
  * Class SproutMailchimpPlugin
  *
  * @package Craft
+ *
+ * @property mixed $cpNavItem
+ * @property array $cpUrlRules
  */
 class SproutMailChimp extends Plugin
 {
@@ -64,7 +67,7 @@ class SproutMailChimp extends Plugin
     /**
      * @return string
      */
-    public function getName()
+    public function getName(): string
     {
         return 'Sprout MailChimp';
     }
@@ -72,7 +75,7 @@ class SproutMailChimp extends Plugin
     /**
      * @return string
      */
-    public function getDescription()
+    public function getDescription(): string
     {
         return 'Integrate MailChimp into your Craft CMS workflow with Sprout Email.';
     }
@@ -85,7 +88,7 @@ class SproutMailChimp extends Plugin
     /**
      * @return array
      */
-    private function getCpUrlRules()
+    private function getCpUrlRules(): array
     {
         return [
             'sprout-mail-chimp' =>

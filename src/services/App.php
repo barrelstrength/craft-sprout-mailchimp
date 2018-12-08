@@ -16,7 +16,7 @@ class App extends Component
     /**
      * @var \Mailchimp
      */
-    protected $client = null;
+    protected $client;
 
     /**
      * @throws \Mailchimp_Error
@@ -39,7 +39,7 @@ class App extends Component
     /**
      * @return Model
      */
-    public function getSettings()
+    public function getSettings(): Model
     {
         $file = Craft::$app->getConfig()->getConfigFromFile('sprout-email');
 
@@ -71,9 +71,8 @@ class App extends Component
         try {
             $lists = $this->client->lists->getList($params);
 
-            $stats = $lists['data'][0]['stats'];
-
-            return $stats;
+            // Return stats
+            return $lists['data'][0]['stats'];
         } catch (\Exception $e) {
             throw $e;
         }
@@ -86,7 +85,7 @@ class App extends Component
      * @return array
      * @throws \Exception
      */
-    public function sendCampaignEmail(CampaignModel $mailChimpModel, array $campaignIds)
+    public function sendCampaignEmail(CampaignModel $mailChimpModel, array $campaignIds): array
     {
         if (count($campaignIds)) {
             foreach ($campaignIds as $mailchimpCampaignId) {
@@ -122,7 +121,7 @@ class App extends Component
      * @return array
      * @throws \Exception
      */
-    public function sendTestEmail(CampaignModel $mailChimpModel, $emails, array $campaignIds)
+    public function sendTestEmail(CampaignModel $mailChimpModel, $emails, array $campaignIds): array
     {
         if (count($campaignIds)) {
             // Send only one email by getting the first campaign ID for testing purpose only.
@@ -157,7 +156,7 @@ class App extends Component
      * @return array
      * @throws \Exception
      */
-    public function createCampaign(CampaignModel $mailChimpModel)
+    public function createCampaign(CampaignModel $mailChimpModel): array
     {
         $lists = $mailChimpModel->lists;
 
@@ -202,7 +201,7 @@ class App extends Component
         return $campaignIds;
     }
 
-    public function getCampaignIdsIfExists(array $campaignIds = [])
+    public function getCampaignIdsIfExists(array $campaignIds = []): array
     {
         $apiIds = [];
 
@@ -212,7 +211,7 @@ class App extends Component
                 try {
                     $campaign = $this->client->campaigns->ready($campaignId);
 
-                    if (!empty($campaign) && $campaign['is_ready'] == true) {
+                    if ($campaign !== null && $campaign['is_ready'] == true) {
                         $apiIds[] = $campaignId;
                     }
                 } catch (\Exception $exception) {

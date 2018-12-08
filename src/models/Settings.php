@@ -6,6 +6,10 @@ use barrelstrength\sproutmailchimp\SproutMailChimp;
 use craft\base\Model;
 use Craft;
 
+/**
+ *
+ * @property array $settingsNavItems
+ */
 class Settings extends Model
 {
     public $inlineCss;
@@ -14,7 +18,10 @@ class Settings extends Model
 
     public $pluginNameOverride;
 
-    public function rules()
+    /**
+     * @inheritdoc
+     */
+    public function rules(): array
     {
         $rules = parent::rules();
         $rules[] = ['apiKey', 'validateApiKey'];
@@ -43,7 +50,7 @@ class Settings extends Model
         }
     }
 
-    public function getSettingsNavItems()
+    public function getSettingsNavItems(): array
     {
         return [
             'settingsHeading' => [
