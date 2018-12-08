@@ -31,9 +31,6 @@
   "extra": {
     "name": "Sprout Mailchimp",
     "handle": "sprout-mailchimp",
-    "schemaVersion": "3",
-    "hasSettings": true,
-    "hasCpSection": true,
     "changelogUrl": "???",
     "class": "barrelstrength\\sproutmailchimp\\SproutMailchimp"
   }
