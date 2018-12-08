@@ -10,11 +10,13 @@ use barrelstrength\sproutemail\models\CampaignType;
 use barrelstrength\sproutemail\SproutEmail;
 use barrelstrength\sproutmailchimp\models\CampaignModel;
 use barrelstrength\sproutmailchimp\SproutMailchimp;
+use craft\base\Plugin;
 use craft\helpers\Json;
 use craft\helpers\Template;
 use craft\helpers\UrlHelper;
 use Craft;
 use yii\base\Exception;
+use yii\swiftmailer\Message;
 
 /**
  * Enables you to send your campaigns using Mailchimp
@@ -25,9 +27,29 @@ use yii\base\Exception;
  */
 class MailchimpMailer extends Mailer implements CampaignEmailSenderInterface
 {
-    public function __construct()
+    /**
+     * @var \Mailchimp
+     */
+    protected $client;
+
+    /**
+     * @throws \Mailchimp_Error
+     */
+    public function init()
     {
-        $this->settings = SproutMailchimp::$app->getSettings();
+        parent::init();
+
+        /** @var $plugin Plugin */
+        $plugin = SproutMailchimp::getInstance();
+        $this->settings = $plugin->getSettings();
+
+        if (isset($this->settings['apiKey'])) {
+            $apiKey = $this->settings['apiKey'];
+
+            $client = new \Mailchimp($apiKey);
+
+            $this->client = $client;
+        }
     }
 
     /**
@@ -59,7 +81,7 @@ class MailchimpMailer extends Mailer implements CampaignEmailSenderInterface
      */
     public function getCpSettingsUrl(): string
     {
-        return UrlHelper::cpUrl('sprout-mailchimp/settings');
+        return UrlHelper::cpUrl('settings/plugins/sprout-mailchimp');
     }
 
 
@@ -93,7 +115,7 @@ class MailchimpMailer extends Mailer implements CampaignEmailSenderInterface
             $mailChimpModel = $this->prepareMailchimpModel($campaignEmail, $campaignType);
 
             // Mailchimp API does not support updating of campaign if already sent so always create a campaign.
-            $campaignIds = SproutMailchimp::$app->createCampaign($mailChimpModel);
+            $campaignIds = $this->createCampaign($mailChimpModel);
 
             $listsCount = 0;
 
@@ -105,14 +127,30 @@ class MailchimpMailer extends Mailer implements CampaignEmailSenderInterface
                 }
             }
 
-            $sentCampaign = SproutMailchimp::$app->sendCampaignEmail($mailChimpModel, $campaignIds);
+            if (count($campaignIds)) {
+                foreach ($campaignIds as $mailchimpCampaignId) {
+                    try {
+                        $this->send($mailchimpCampaignId);
+                    } catch (\Exception $e) {
+                        throw $e;
+                    }
+                }
+            }
+
+            $message = new Message();
+            $message->setSubject($mailChimpModel->title);
+            $message->setFrom([$mailChimpModel->from_email => $mailChimpModel->from_name]);
+            $message->setTextBody($mailChimpModel->text);
+            $message->setHtmlBody($mailChimpModel->html);
+
+            $sentCampaign['ids'] = $campaignIds;
+            $sentCampaign['emailModel'] = $message;
 
             if (!empty($sentCampaign['ids'])) {
                 SproutEmail::$app->campaignEmails->saveEmailSettings($campaignEmail);
             }
 
             $response->emailModel = $sentCampaign['emailModel'];
-
             $response->success = true;
             $response->message = Craft::t('sprout-mailchimp', 'Campaign successfully sent to {count} recipient lists.', [
                 'count' => $listsCount
@@ -157,7 +195,33 @@ class MailchimpMailer extends Mailer implements CampaignEmailSenderInterface
                 $response->success = false;
                 $response->message = Craft::t('sprout-mailchimp', 'No lists selected.');
             } else {
-                $sentCampaign = SproutMailchimp::$app->sendTestEmail($mailChimpModel, $emails, $campaignIds);
+                if (count($campaignIds)) {
+                    // Send only one email by getting the first campaign ID for testing purpose only.
+                    $firstCampaignId = $campaignIds[0];
+
+                    try {
+                        $this->client->campaigns->sendTest($firstCampaignId, $emails);
+                    } catch (\Exception $e) {
+                        throw $e;
+                    }
+                }
+
+                $message = new Message();
+
+                $message->setSubject($mailChimpModel->title);
+                $message->setFrom([$mailChimpModel->from_email => $mailChimpModel->from_name]);
+
+                $message->setTextBody($mailChimpModel->text);
+                $message->setHtmlBody($mailChimpModel->html);
+
+                // @todo - fix up with updated recipients behavior
+                if (!empty($emails)) {
+                    $recipients = implode(', ', $emails);
+                    $message->setTo($recipients);
+                }
+
+                $sentCampaign['ids'] = $campaignIds;
+                $sentCampaign['emailModel'] = $message;
 
                 if (!empty($sentCampaign['ids'])) {
                     SproutEmail::$app->campaignEmails->saveEmailSettings($campaignEmail, [
@@ -186,6 +250,25 @@ class MailchimpMailer extends Mailer implements CampaignEmailSenderInterface
         ]);
 
         return $response;
+    }
+
+    /**
+     * Sends a previously created/exported campaign via its mail chimp campaign id
+     *
+     * @param string $mailchimpCampaignId
+     *
+     * @throws \Exception
+     * @return true
+     */
+    public function send($mailchimpCampaignId)
+    {
+        try {
+            $this->client->campaigns->send($mailchimpCampaignId);
+
+            return true;
+        } catch (\Exception $e) {
+            throw $e;
+        }
     }
 
     /**
@@ -332,8 +415,20 @@ class MailchimpMailer extends Mailer implements CampaignEmailSenderInterface
                 if (isset($list['id'], $list['name'])) {
                     $length = 0;
 
-                    if ($lists = SproutMailchimp::$app->getListStatsById($list['id'])) {
-                        $length = number_format($lists['member_count']);
+                    $listStats = null;
+                    $params = ['list_id' => $list['id']];
+
+                    try {
+                        $lists = $this->client->lists->getList($params);
+
+                        // Get List Stats
+                        $listStats = $lists['data'][0]['stats'];
+                    } catch (\Exception $e) {
+                        throw $e;
+                    }
+
+                    if ($listStats) {
+                        $length = number_format($listStats['member_count']);
                     }
 
                     $listUrl = 'https://us7.admin.mailchimp.com/lists/members/?id='.$list['web_id'];
@@ -355,7 +450,7 @@ class MailchimpMailer extends Mailer implements CampaignEmailSenderInterface
                 $listIds = $values['listIds'];
             } else {
                 $values = Json::decode($values);
-                $listIds = $values->listIds;
+                $listIds = $values['listIds'];
             }
 
             if (!empty($listIds)) {
@@ -398,15 +493,120 @@ class MailchimpMailer extends Mailer implements CampaignEmailSenderInterface
 
             if (!empty($emailSettingsIds)) {
                 // Make sure campaign is not deleted on mailchimp only include existing ones.
-                $campaignIds = SproutMailchimp::$app->getCampaignIdsIfExists($emailSettingsIds);
+                $campaignIds = $this->getCampaignIdsIfExists($emailSettingsIds);
             }
         }
 
         if (empty($campaignIds)) {
-            $campaignIds = SproutMailchimp::$app->createCampaign($mailChimpModel);
+            $campaignIds = $this->createCampaign($mailChimpModel);
         } else {
             foreach ($campaignIds as $campaignId) {
-                SproutMailchimp::$app->updateCampaignContent($campaignId, $mailChimpModel);
+                $this->updateCampaignContent($campaignId, $mailChimpModel);
+            }
+        }
+
+        return $campaignIds;
+    }
+
+    /**
+     * @param $campaignId
+     * @param $mailChimpModel
+     */
+    public function updateCampaignContent($campaignId, $mailChimpModel)
+    {
+        $options = [
+            'title' => $mailChimpModel->title,
+            'subject' => $mailChimpModel->subject,
+            'from_name' => $mailChimpModel->from_name,
+            'from_email' => $mailChimpModel->from_email,
+            'tracking' => [
+                'opens' => true,
+                'html_clicks' => true,
+                'text_clicks' => false
+            ],
+        ];
+
+        $content = [
+            'html' => $mailChimpModel->html,
+            'text' => $mailChimpModel->text
+        ];
+
+        $this->client->campaigns->update($campaignId, 'options', $options);
+        $this->client->campaigns->update($campaignId, 'content', $content);
+    }
+
+    /**
+     * @param array $campaignIds
+     *
+     * @return array
+     */
+    public function getCampaignIdsIfExists(array $campaignIds = []): array
+    {
+        $apiIds = [];
+
+        if (!empty($campaignIds)) {
+            foreach ($campaignIds as $campaignId) {
+                // If it returns an error it means campaign has been deleted, Do nothing instead of throwing an error.
+                try {
+                    $campaign = $this->client->campaigns->ready($campaignId);
+
+                    if ($campaign !== null && $campaign['is_ready'] == true) {
+                        $apiIds[] = $campaignId;
+                    }
+                } catch (\Exception $exception) {
+
+                }
+            }
+        }
+
+        return $apiIds;
+    }
+
+    /**
+     * @param CampaignModel $mailChimpModel
+     *
+     * @return array
+     * @throws \Exception
+     */
+    public function createCampaign(CampaignModel $mailChimpModel): array
+    {
+        $lists = $mailChimpModel->lists;
+
+        $campaignIds = [];
+
+        if ($lists && count($lists)) {
+            $type = 'regular';
+            $options = [
+                'title' => $mailChimpModel->title,
+                'subject' => $mailChimpModel->subject,
+                'from_name' => $mailChimpModel->from_name,
+                'from_email' => $mailChimpModel->from_email,
+                'tracking' => [
+                    'opens' => true,
+                    'html_clicks' => true,
+                    'text_clicks' => false
+                ],
+            ];
+
+            $content = [
+                'html' => $mailChimpModel->html,
+                'text' => $mailChimpModel->text
+            ];
+
+            foreach ($lists as $list) {
+                $options['list_id'] = $list;
+
+                if ($this->settings['inlineCss']) {
+                    $options['inline_css'] = true;
+                }
+
+                try {
+                    $campaignType = $this->client->campaigns->create($type, $options, $content);
+
+                    $campaignIds[] = $campaignType['id'];
+                } catch (\Exception $e) {
+                    throw $e;
+                }
             }
         }
 
