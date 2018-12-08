@@ -9,7 +9,7 @@ use barrelstrength\sproutemail\elements\CampaignEmail;
 use barrelstrength\sproutemail\models\CampaignType;
 use barrelstrength\sproutemail\SproutEmail;
 use barrelstrength\sproutmailchimp\models\CampaignModel;
-use barrelstrength\sproutmailchimp\SproutMailChimp;
+use barrelstrength\sproutmailchimp\SproutMailchimp;
 use craft\helpers\Json;
 use craft\helpers\Template;
 use craft\helpers\UrlHelper;
@@ -17,17 +17,17 @@ use Craft;
 use yii\base\Exception;
 
 /**
- * Enables you to send your campaigns using MailChimp
+ * Enables you to send your campaigns using Mailchimp
  *
- * Class SproutMailChimpMailer
+ * Class MailchimpMailer
  *
  * @package Craft
  */
-class MailChimpMailer extends Mailer implements CampaignEmailSenderInterface
+class MailchimpMailer extends Mailer implements CampaignEmailSenderInterface
 {
     public function __construct()
     {
-        $this->settings = SproutMailChimp::$app->getSettings();
+        $this->settings = SproutMailchimp::$app->getSettings();
     }
 
     /**
@@ -35,7 +35,7 @@ class MailChimpMailer extends Mailer implements CampaignEmailSenderInterface
      */
     public function getName(): string
     {
-        return 'MailChimp';
+        return 'Mailchimp';
     }
 
     /**
@@ -43,7 +43,7 @@ class MailChimpMailer extends Mailer implements CampaignEmailSenderInterface
      */
     public function getTitle(): string
     {
-        return 'MailChimp';
+        return 'Mailchimp';
     }
 
     /**
@@ -51,7 +51,7 @@ class MailChimpMailer extends Mailer implements CampaignEmailSenderInterface
      */
     public function getDescription(): string
     {
-        return Craft::t('sprout-mail-chimp', 'Send your email campaigns via MailChimp.');
+        return Craft::t('sprout-mailchimp', 'Send your email campaigns via Mailchimp.');
     }
 
     /**
@@ -59,7 +59,7 @@ class MailChimpMailer extends Mailer implements CampaignEmailSenderInterface
      */
     public function getCpSettingsUrl(): string
     {
-        return UrlHelper::cpUrl('sprout-mail-chimp/settings');
+        return UrlHelper::cpUrl('sprout-mailchimp/settings');
     }
 
 
@@ -90,10 +90,10 @@ class MailChimpMailer extends Mailer implements CampaignEmailSenderInterface
         $response = new ModalResponse();
 
         try {
-            $mailChimpModel = $this->prepareMailChimpModel($campaignEmail, $campaignType);
+            $mailChimpModel = $this->prepareMailchimpModel($campaignEmail, $campaignType);
 
-            // MailChimp API does not support updating of campaign if already sent so always create a campaign.
-            $campaignIds = SproutMailChimp::$app->createCampaign($mailChimpModel);
+            // Mailchimp API does not support updating of campaign if already sent so always create a campaign.
+            $campaignIds = SproutMailchimp::$app->createCampaign($mailChimpModel);
 
             $listsCount = 0;
 
@@ -105,7 +105,7 @@ class MailChimpMailer extends Mailer implements CampaignEmailSenderInterface
                 }
             }
 
-            $sentCampaign = SproutMailChimp::$app->sendCampaignEmail($mailChimpModel, $campaignIds);
+            $sentCampaign = SproutMailchimp::$app->sendCampaignEmail($mailChimpModel, $campaignIds);
 
             if (!empty($sentCampaign['ids'])) {
                 SproutEmail::$app->campaignEmails->saveEmailSettings($campaignEmail);
@@ -114,7 +114,7 @@ class MailChimpMailer extends Mailer implements CampaignEmailSenderInterface
             $response->emailModel = $sentCampaign['emailModel'];
 
             $response->success = true;
-            $response->message = Craft::t('sprout-mail-chimp', 'Campaign successfully sent to {count} recipient lists.', [
+            $response->message = Craft::t('sprout-mailchimp', 'Campaign successfully sent to {count} recipient lists.', [
                 'count' => $listsCount
             ]);
         } catch (\Exception $e) {
@@ -149,15 +149,15 @@ class MailChimpMailer extends Mailer implements CampaignEmailSenderInterface
         $response = new ModalResponse();
 
         try {
-            $mailChimpModel = $this->prepareMailChimpModel($campaignEmail, $campaignType);
+            $mailChimpModel = $this->prepareMailchimpModel($campaignEmail, $campaignType);
 
             $campaignIds = $this->getCampaignIds($campaignEmail, $mailChimpModel);
 
             if (empty($campaignIds)) {
                 $response->success = false;
-                $response->message = Craft::t('sprout-mail-chimp', 'No lists selected.');
+                $response->message = Craft::t('sprout-mailchimp', 'No lists selected.');
             } else {
-                $sentCampaign = SproutMailChimp::$app->sendTestEmail($mailChimpModel, $emails, $campaignIds);
+                $sentCampaign = SproutMailchimp::$app->sendTestEmail($mailChimpModel, $emails, $campaignIds);
 
                 if (!empty($sentCampaign['ids'])) {
                     SproutEmail::$app->campaignEmails->saveEmailSettings($campaignEmail, [
@@ -168,7 +168,7 @@ class MailChimpMailer extends Mailer implements CampaignEmailSenderInterface
                 $response->emailModel = $sentCampaign['emailModel'];
 
                 $response->success = true;
-                $response->message = Craft::t('sprout-mail-chimp', 'Test Campaign sent to {emails}.', [
+                $response->message = Craft::t('sprout-mailchimp', 'Test Campaign sent to {emails}.', [
                     'emails' => implode(', ', $emails)
                 ]);
             }
@@ -196,7 +196,7 @@ class MailChimpMailer extends Mailer implements CampaignEmailSenderInterface
      * @throws \Twig_Error_Loader
      * @throws \yii\base\Exception
      */
-    private function prepareMailChimpModel(CampaignEmail $campaignEmail, CampaignType $campaignType): CampaignModel
+    private function prepareMailchimpModel(CampaignEmail $campaignEmail, CampaignType $campaignType): CampaignModel
     {
         $html = $campaignEmail->getEmailTemplates()->getHtmlBody();
         $text = $campaignEmail->getEmailTemplates()->getTextBody();
@@ -240,7 +240,7 @@ class MailChimpMailer extends Mailer implements CampaignEmailSenderInterface
         $lists = [];
 
         if (!isset($listSettings->listIds)) {
-            throw new Exception(Craft::t('sprout-mail-chimp', 'No list settings found. <a href="{cpEditUrl}">Add a list</a>', [
+            throw new Exception(Craft::t('sprout-mailchimp', 'No list settings found. <a href="{cpEditUrl}">Add a list</a>', [
                 'cpEditUrl' => $campaignEmail->getCpEditUrl()
             ]));
         }
@@ -332,7 +332,7 @@ class MailChimpMailer extends Mailer implements CampaignEmailSenderInterface
                 if (isset($list['id'], $list['name'])) {
                     $length = 0;
 
-                    if ($lists = SproutMailChimp::$app->getListStatsById($list['id'])) {
+                    if ($lists = SproutMailchimp::$app->getListStatsById($list['id'])) {
                         $length = number_format($lists['member_count']);
                     }
 
@@ -345,9 +345,9 @@ class MailChimpMailer extends Mailer implements CampaignEmailSenderInterface
                 }
             }
         } else if ($lists === false) {
-            $errors[] = Craft::t('sprout-mail-chimp', 'Unable to retrieve lists due to an SSL certificate problem: unable to get local issuer certificate. Please contact you server administrator or hosting support.');
+            $errors[] = Craft::t('sprout-mailchimp', 'Unable to retrieve lists due to an SSL certificate problem: unable to get local issuer certificate. Please contact you server administrator or hosting support.');
         } else {
-            $errors[] = Craft::t('sprout-mail-chimp', 'No lists found. Create your first list in MailChimp.');
+            $errors[] = Craft::t('sprout-mailchimp', 'No lists found. Create your first list in Mailchimp.');
         }
 
         if ($values) {
@@ -365,7 +365,7 @@ class MailChimpMailer extends Mailer implements CampaignEmailSenderInterface
             }
         }
 
-        return Craft::$app->getView()->renderTemplate('sprout-mail-chimp/_settings/lists', [
+        return Craft::$app->getView()->renderTemplate('sprout-mailchimp/_settings/lists', [
             'options' => $options,
             'values' => $selected,
             'errors' => $errors
@@ -398,15 +398,15 @@ class MailChimpMailer extends Mailer implements CampaignEmailSenderInterface
 
             if (!empty($emailSettingsIds)) {
                 // Make sure campaign is not deleted on mailchimp only include existing ones.
-                $campaignIds = SproutMailChimp::$app->getCampaignIdsIfExists($emailSettingsIds);
+                $campaignIds = SproutMailchimp::$app->getCampaignIdsIfExists($emailSettingsIds);
             }
         }
 
         if (empty($campaignIds)) {
-            $campaignIds = SproutMailChimp::$app->createCampaign($mailChimpModel);
+            $campaignIds = SproutMailchimp::$app->createCampaign($mailChimpModel);
         } else {
             foreach ($campaignIds as $campaignId) {
-                SproutMailChimp::$app->updateCampaignContent($campaignId, $mailChimpModel);
+                SproutMailchimp::$app->updateCampaignContent($campaignId, $mailChimpModel);
             }
         }
 

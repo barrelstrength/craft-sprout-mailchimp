@@ -6,7 +6,7 @@ use barrelstrength\sproutbase\base\BaseSproutTrait;
 use barrelstrength\sproutbase\app\email\events\RegisterMailersEvent;
 use barrelstrength\sproutbase\app\email\services\Mailers;
 use barrelstrength\sproutbase\SproutBaseHelper;
-use barrelstrength\sproutmailchimp\integrations\sproutemail\MailChimpMailer;
+use barrelstrength\sproutmailchimp\integrations\sproutemail\MailchimpMailer;
 use barrelstrength\sproutmailchimp\models\Settings;
 use barrelstrength\sproutmailchimp\services\App;
 use craft\base\Plugin;
@@ -23,11 +23,11 @@ use craft\events\RegisterUrlRulesEvent;
  * @property mixed $cpNavItem
  * @property array $cpUrlRules
  */
-class SproutMailChimp extends Plugin
+class SproutMailchimp extends Plugin
 {
     use BaseSproutTrait;
 
-    public $hasSettings = true;
+    public $hasCpSettings = true;
     public $hasCpSection = true;
 
     /**
@@ -36,7 +36,7 @@ class SproutMailChimp extends Plugin
      * @var \barrelstrength\sproutmailchimp\services\App
      */
     public static $app;
-    public static $pluginId = 'sprout-mail-chimp';
+    public static $pluginId = 'sprout-mailchimp';
 
     /**
      * @throws \yii\base\InvalidConfigException
@@ -60,7 +60,7 @@ class SproutMailChimp extends Plugin
         });
 
         Event::on(Mailers::class, Mailers::EVENT_REGISTER_MAILER_TYPES, function(RegisterMailersEvent $event) {
-            $event->mailers[] = new MailChimpMailer();
+            $event->mailers[] = new MailchimpMailer();
         });
     }
 
@@ -69,7 +69,7 @@ class SproutMailChimp extends Plugin
      */
     public function getName(): string
     {
-        return 'Sprout MailChimp';
+        return 'Sprout Mailchimp';
     }
 
     /**
@@ -77,12 +77,27 @@ class SproutMailChimp extends Plugin
      */
     public function getDescription(): string
     {
-        return 'Integrate MailChimp into your Craft CMS workflow with Sprout Email.';
+        return 'Integrate Mailchimp into your Craft CMS workflow with Sprout Email.';
     }
 
+    /**
+     * @return Settings|\craft\base\Model|null
+     */
     public function createSettingsModel()
     {
         return new Settings();
+    }
+
+    /**
+     * @return string|null
+     * @throws \Twig_Error_Loader
+     * @throws \yii\base\Exception
+     */
+    protected function settingsHtml()
+    {
+        return Craft::$app->getView()->renderTemplate('sprout-mailchimp/_settings/general', [
+            'settings' => $this->getSettings()
+        ]);
     }
 
     /**
@@ -91,13 +106,13 @@ class SproutMailChimp extends Plugin
     private function getCpUrlRules(): array
     {
         return [
-            'sprout-mail-chimp' =>
+            'sprout-mailchimp' =>
                 'sprout/settings/edit-settings',
 
-            'sprout-mail-chimp/settings' =>
+            'sprout-mailchimp/settings' =>
                 'sprout/settings/edit-settings',
 
-            'sprout-mail-chimp/settings/<settingsSectionHandle:.*>' =>
+            'sprout-mailchimp/settings/<settingsSectionHandle:.*>' =>
                 'sprout/settings/edit-settings'
 
         ];
@@ -115,8 +130,8 @@ class SproutMailChimp extends Plugin
         return array_merge($parent, [
             'subnav' => [
                 'settings' => [
-                    'label' => Craft::t('sprout-mail-chimp', 'Settings'),
-                    'url' => 'sprout-mail-chimp/settings'
+                    'label' => Craft::t('sprout-mailchimp', 'Settings'),
+                    'url' => 'sprout-mailchimp/settings'
                 ]
             ]
         ]);
