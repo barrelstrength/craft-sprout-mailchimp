@@ -16,7 +16,7 @@ class Settings extends Model
 
     public function rules()
     {
-        $rules   = parent::rules();
+        $rules = parent::rules();
         $rules[] = ['apiKey', 'validateApiKey'];
 
         return $rules;
@@ -31,16 +31,14 @@ class Settings extends Model
     {
         $value = $this->$attribute;
 
-        if (empty($value))
-        {
+        if (empty($value)) {
             return;
         }
 
         $result = SproutMailChimp::$app->validateApiKey($value);
 
-        if (!$result)
-        {
-            $message = Craft::t('sprout-mail-chimp','API key is invalid.');
+        if (!$result) {
+            $message = Craft::t('sprout-mail-chimp', 'API key is invalid.');
             $this->addError($attribute, $message);
         }
     }
@@ -49,10 +47,10 @@ class Settings extends Model
     {
         return [
             'settingsHeading' => [
-                'heading' => Craft::t('sprout-mail-chimp','Settings'),
+                'heading' => Craft::t('sprout-mail-chimp', 'Settings'),
             ],
             'general' => [
-                'label' => Craft::t('sprout-mail-chimp','General'),
+                'label' => Craft::t('sprout-mail-chimp', 'General'),
                 'url' => 'sprout-mail-chimp/settings/general',
                 'selected' => 'general',
                 'template' => 'sprout-mail-chimp/_settings/general'

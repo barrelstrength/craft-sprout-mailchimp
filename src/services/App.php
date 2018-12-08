@@ -160,7 +160,7 @@ class App extends Component
     public function createCampaign(CampaignModel $mailChimpModel)
     {
         $lists = $mailChimpModel->lists;
-        
+
         $campaignIds = [];
 
         if ($lists && count($lists)) {
