@@ -2,11 +2,11 @@
 
 namespace barrelstrength\sproutmailchimp\integrations\sproutemail;
 
+use barrelstrength\sproutbase\app\email\base\EmailElement;
 use barrelstrength\sproutbase\app\email\base\Mailer;
 use barrelstrength\sproutbase\app\email\base\CampaignEmailSenderInterface;
 use barrelstrength\sproutbase\app\email\models\ModalResponse;
 use barrelstrength\sproutemail\elements\CampaignEmail;
-use barrelstrength\sproutemail\models\CampaignType;
 use barrelstrength\sproutemail\SproutEmail;
 use barrelstrength\sproutmailchimp\models\CampaignModel;
 use barrelstrength\sproutmailchimp\SproutMailchimp;
@@ -24,6 +24,9 @@ use yii\swiftmailer\Message;
  * Class MailchimpMailer
  *
  * @package Craft
+ *
+ * @property \Twig_Markup $recipientLists
+ * @property string       $title
  */
 class MailchimpMailer extends Mailer implements CampaignEmailSenderInterface
 {
@@ -101,21 +104,26 @@ class MailchimpMailer extends Mailer implements CampaignEmailSenderInterface
 
     /**
      * @param CampaignEmail $campaignEmail
-     * @param CampaignType  $campaignType
      *
      * @return ModalResponse|mixed
      * @throws \Twig_Error_Loader
      * @throws \yii\base\Exception
      */
-    public function sendCampaignEmail(CampaignEmail $campaignEmail, CampaignType $campaignType)
+    public function sendCampaignEmail(CampaignEmail $campaignEmail)
     {
         $response = new ModalResponse();
 
         try {
-            $mailChimpModel = $this->prepareMailchimpModel($campaignEmail, $campaignType);
+            $mailChimpModel = $this->prepareMailchimpModel($campaignEmail);
 
+            // @todo Do we really need two methods getting IDs here? This logic got added when
+            // merging in the sendTestCampaignEmail in favor of getIsTest()
             // Mailchimp API does not support updating of campaign if already sent so always create a campaign.
-            $campaignIds = $this->createCampaign($mailChimpModel);
+            if ($campaignEmail->getIsTest()) {
+                $campaignIds = $this->getCampaignIds($campaignEmail, $mailChimpModel);
+            } else {
+                $campaignIds = $this->createCampaign($mailChimpModel);
+            }
 
             $listsCount = 0;
 
@@ -127,12 +135,30 @@ class MailchimpMailer extends Mailer implements CampaignEmailSenderInterface
                 }
             }
 
+//            if (empty($campaignIds)) {
+//                $response->success = false;
+//                $response->message = Craft::t('sprout-mailchimp', 'No lists selected.');
+//            }
+
             if (count($campaignIds)) {
-                foreach ($campaignIds as $mailchimpCampaignId) {
+                if ($campaignEmail->getIsTest()) {
+                    // Test Email
+                    // Send only one email by getting the first campaign ID for testing purpose only.
+                    $firstCampaignId = $campaignIds[0];
+
                     try {
-                        $this->send($mailchimpCampaignId);
+                        $this->client->campaigns->sendTest($firstCampaignId, $this->getOnTheFlyRecipients());
                     } catch (\Exception $e) {
                         throw $e;
+                    }
+                } else {
+                    // Live Email
+                    foreach ($campaignIds as $mailchimpCampaignId) {
+                        try {
+                            $this->send($mailchimpCampaignId);
+                        } catch (\Exception $e) {
+                            throw $e;
+                        }
                     }
                 }
             }
@@ -172,87 +198,6 @@ class MailchimpMailer extends Mailer implements CampaignEmailSenderInterface
     }
 
     /**
-     * @todo - change method signature and remove $emails in favor of $campaignEmail->getRecipients()
-     *
-     * @param CampaignEmail $campaignEmail
-     * @param CampaignType  $campaignType
-     * @param array         $emails
-     *
-     * @return ModalResponse|null
-     * @throws \Twig_Error_Loader
-     * @throws \yii\base\Exception
-     */
-    public function sendTestCampaignEmail(CampaignEmail $campaignEmail, CampaignType $campaignType, array $emails = [])
-    {
-        $response = new ModalResponse();
-
-        try {
-            $mailChimpModel = $this->prepareMailchimpModel($campaignEmail, $campaignType);
-
-            $campaignIds = $this->getCampaignIds($campaignEmail, $mailChimpModel);
-
-            if (empty($campaignIds)) {
-                $response->success = false;
-                $response->message = Craft::t('sprout-mailchimp', 'No lists selected.');
-            } else {
-                if (count($campaignIds)) {
-                    // Send only one email by getting the first campaign ID for testing purpose only.
-                    $firstCampaignId = $campaignIds[0];
-
-                    try {
-                        $this->client->campaigns->sendTest($firstCampaignId, $emails);
-                    } catch (\Exception $e) {
-                        throw $e;
-                    }
-                }
-
-                $message = new Message();
-
-                $message->setSubject($mailChimpModel->title);
-                $message->setFrom([$mailChimpModel->from_email => $mailChimpModel->from_name]);
-
-                $message->setTextBody($mailChimpModel->text);
-                $message->setHtmlBody($mailChimpModel->html);
-
-                // @todo - fix up with updated recipients behavior
-                if (!empty($emails)) {
-                    $recipients = implode(', ', $emails);
-                    $message->setTo($recipients);
-                }
-
-                $sentCampaign['ids'] = $campaignIds;
-                $sentCampaign['emailModel'] = $message;
-
-                if (!empty($sentCampaign['ids'])) {
-                    SproutEmail::$app->campaignEmails->saveEmailSettings($campaignEmail, [
-                        'campaignIds' => $sentCampaign['ids']
-                    ]);
-                }
-
-                $response->emailModel = $sentCampaign['emailModel'];
-
-                $response->success = true;
-                $response->message = Craft::t('sprout-mailchimp', 'Test Campaign sent to {emails}.', [
-                    'emails' => implode(', ', $emails)
-                ]);
-            }
-        } catch (\Exception $e) {
-            $response->success = false;
-            $response->message = $e->getMessage();
-
-            SproutEmail::error($e->getMessage());
-        }
-
-        $response->content = Craft::$app->getView()->renderTemplate('sprout-base-email/_modals/response', [
-            'email' => $campaignEmail,
-            'success' => $response->success,
-            'message' => $response->message
-        ]);
-
-        return $response;
-    }
-
-    /**
      * Sends a previously created/exported campaign via its mail chimp campaign id
      *
      * @param string $mailchimpCampaignId
@@ -273,13 +218,12 @@ class MailchimpMailer extends Mailer implements CampaignEmailSenderInterface
 
     /**
      * @param CampaignEmail $campaignEmail
-     * @param CampaignType  $campaignType
      *
      * @return CampaignModel
      * @throws \Twig_Error_Loader
      * @throws \yii\base\Exception
      */
-    private function prepareMailchimpModel(CampaignEmail $campaignEmail, CampaignType $campaignType): CampaignModel
+    private function prepareMailchimpModel(CampaignEmail $campaignEmail): CampaignModel
     {
         $html = $campaignEmail->getEmailTemplates()->getHtmlBody();
         $text = $campaignEmail->getEmailTemplates()->getTextBody();
@@ -306,25 +250,26 @@ class MailchimpMailer extends Mailer implements CampaignEmailSenderInterface
     }
 
     /**
-     * @param CampaignEmail $campaignEmail
-     * @param CampaignType  $campaignType
+     * @param EmailElement|CampaignEmail $email
      *
      * @return string
+     * @throws Exception
+     * @throws \Twig_Error_Loader
      * @throws \Exception
      */
-    public function getPrepareModalHtml(CampaignEmail $campaignEmail, CampaignType $campaignType): string
+    public function getPrepareModalHtml(EmailElement $email): string
     {
-        if (strpos($campaignEmail->replyToEmail, '{') !== false) {
-            $campaignEmail->replyToEmail = $campaignEmail->fromEmail;
+        if (strpos($email->replyToEmail, '{') !== false) {
+            $email->replyToEmail = $email->fromEmail;
         }
 
-        $listSettings = Json::decode($campaignEmail->listSettings);
+        $listSettings = Json::decode($email->listSettings);
 
         $lists = [];
 
         if (!isset($listSettings->listIds)) {
             throw new Exception(Craft::t('sprout-mailchimp', 'No list settings found. <a href="{cpEditUrl}">Add a list</a>', [
-                'cpEditUrl' => $campaignEmail->getCpEditUrl()
+                'cpEditUrl' => $email->getCpEditUrl()
             ]));
         }
 
@@ -339,8 +284,8 @@ class MailchimpMailer extends Mailer implements CampaignEmailSenderInterface
 
         return Craft::$app->getView()->renderTemplate('sprout-base-email/_modals/campaigns/prepare-email-snapshot', [
             'mailer' => $this,
-            'email' => $campaignEmail,
-            'campaignType' => $campaignType,
+            'email' => $email,
+            'campaignType' => $email->getCampaignType(),
             'lists' => $lists,
             'canBeTested' => false
         ]);
@@ -372,9 +317,9 @@ class MailchimpMailer extends Mailer implements CampaignEmailSenderInterface
     }
 
     /**
-     * @return bool|null|string
+     * @return array
      */
-    public function getLists()
+    public function getLists(): array
     {
         try {
             $client = new \Mailchimp($this->settings['apiKey']);
@@ -385,11 +330,11 @@ class MailchimpMailer extends Mailer implements CampaignEmailSenderInterface
                 return $lists['data'];
             }
         } catch (\Exception $e) {
-            if ($e->getMessage() == 'API call to lists/list failed: SSL certificate problem: unable to get local issuer certificate') {
-                return false;
-            }
+//            if ($e->getMessage() == 'API call to lists/list failed: SSL certificate problem: unable to get local issuer certificate') {
+//                return false;
+//            }
 
-            return $e->getMessage();
+            Craft::error('sprout-mailchimp', $e->getMessage());
         }
 
         return null;

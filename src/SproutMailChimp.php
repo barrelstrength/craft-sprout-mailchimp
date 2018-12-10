@@ -2,10 +2,8 @@
 
 namespace barrelstrength\sproutmailchimp;
 
-use barrelstrength\sproutbase\base\BaseSproutTrait;
 use barrelstrength\sproutbase\app\email\events\RegisterMailersEvent;
 use barrelstrength\sproutbase\app\email\services\Mailers;
-use barrelstrength\sproutbase\SproutBaseHelper;
 use barrelstrength\sproutmailchimp\integrations\sproutemail\MailchimpMailer;
 use barrelstrength\sproutmailchimp\models\Settings;
 use craft\base\Plugin;
