@@ -5,6 +5,7 @@ namespace barrelstrength\sproutmailchimp\integrations\sproutemail;
 use barrelstrength\sproutbase\app\email\base\EmailElement;
 use barrelstrength\sproutbase\app\email\base\Mailer;
 use barrelstrength\sproutbase\app\email\base\CampaignEmailSenderInterface;
+use barrelstrength\sproutbase\app\email\base\SenderTrait;
 use barrelstrength\sproutbase\app\email\models\ModalResponse;
 use barrelstrength\sproutemail\elements\CampaignEmail;
 use barrelstrength\sproutemail\SproutEmail;
@@ -30,6 +31,7 @@ use yii\swiftmailer\Message;
  */
 class MailchimpMailer extends Mailer implements CampaignEmailSenderInterface
 {
+    use SenderTrait;
     /**
      * @var \Mailchimp
      */
