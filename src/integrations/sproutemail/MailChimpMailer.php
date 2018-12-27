@@ -416,16 +416,6 @@ class MailchimpMailer extends Mailer implements CampaignEmailSenderInterface
     }
 
     /**
-     * @param CampaignEmail $campaignEmail
-     *
-     * @return array
-     */
-    public function prepareLists(CampaignEmail $campaignEmail): array
-    {
-        return [];
-    }
-
-    /**
      * @param $campaignEmail
      * @param $mailChimpModel
      *
@@ -549,6 +539,7 @@ class MailchimpMailer extends Mailer implements CampaignEmailSenderInterface
                 }
 
                 try {
+                    /** @noinspection PhpParamsInspection */
                     $campaignType = $this->client->campaigns->create($type, $options, $content);
 
                     $campaignIds[] = $campaignType['id'];
