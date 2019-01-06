@@ -199,6 +199,11 @@ class MailchimpMailer extends Mailer implements CampaignEmailSenderInterface
         return $response;
     }
 
+    public function sendTestCampaignEmail(CampaignEmail $campaignEmail)
+    {
+        $this->sendCampaignEmail($campaignEmail);
+    }
+
     /**
      * Sends a previously created/exported campaign via its mail chimp campaign id
      *
