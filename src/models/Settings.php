@@ -2,6 +2,7 @@
 
 namespace barrelstrength\sproutmailchimp\models;
 
+use barrelstrength\sproutbase\base\SproutSettingsInterface;
 use craft\base\Model;
 use Craft;
 
@@ -9,7 +10,7 @@ use Craft;
  *
  * @property array $settingsNavItems
  */
-class Settings extends Model
+class Settings extends Model implements SproutSettingsInterface
 {
     public $apiKey;
 
@@ -49,7 +50,26 @@ class Settings extends Model
 
         if (!$result) {
             $message = Craft::t('sprout-mailchimp', 'API key is invalid.');
+
             $this->addError($attribute, $message);
         }
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getSettingsNavItems(): array
+    {
+        return [
+            'settingsHeading' => [
+                'heading' => Craft::t('sprout-mailchimp', 'Settings'),
+            ],
+            'general' => [
+                'label' => Craft::t('sprout-campaign', 'General'),
+                'url' => 'sprout-mailchimp/settings/general',
+                'selected' => 'general',
+                'template' => 'sprout-mailchimp/_settings/general'
+            ]
+       ];
     }
 }

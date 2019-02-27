@@ -2,13 +2,13 @@
 
 namespace barrelstrength\sproutmailchimp\integrations\sproutemail;
 
-use barrelstrength\sproutbase\app\email\base\EmailElement;
-use barrelstrength\sproutbase\app\email\base\Mailer;
-use barrelstrength\sproutbase\app\email\base\CampaignEmailSenderInterface;
-use barrelstrength\sproutbase\app\email\base\SenderTrait;
-use barrelstrength\sproutbase\app\email\models\ModalResponse;
-use barrelstrength\sproutemail\elements\CampaignEmail;
-use barrelstrength\sproutemail\SproutEmail;
+use barrelstrength\sproutbaseemail\base\EmailElement;
+use barrelstrength\sproutbaseemail\base\Mailer;
+use barrelstrength\sproutcampaign\base\CampaignEmailSenderInterface;
+use barrelstrength\sproutbaseemail\base\SenderTrait;
+use barrelstrength\sproutbaseemail\models\ModalResponse;
+use barrelstrength\sproutcampaign\elements\CampaignEmail;
+use barrelstrength\sproutcampaign\SproutCampaign;
 use barrelstrength\sproutmailchimp\models\CampaignModel;
 use barrelstrength\sproutmailchimp\SproutMailchimp;
 use craft\base\Plugin;
@@ -175,7 +175,7 @@ class MailchimpMailer extends Mailer implements CampaignEmailSenderInterface
             $sentCampaign['emailModel'] = $message;
 
             if (!empty($sentCampaign['ids'])) {
-                SproutEmail::$app->campaignEmails->saveEmailSettings($campaignEmail);
+                SproutCampaign::$app->campaignEmails->saveEmailSettings($campaignEmail);
             }
 
             $response->emailModel = $sentCampaign['emailModel'];
@@ -187,7 +187,7 @@ class MailchimpMailer extends Mailer implements CampaignEmailSenderInterface
             $response->success = false;
             $response->message = $e->getMessage();
 
-            SproutEmail::error($e->getMessage());
+            SproutCampaign::error($e->getMessage());
         }
 
         $response->content = Craft::$app->getView()->renderTemplate('sprout-base-email/_modals/response', [
@@ -339,7 +339,7 @@ class MailchimpMailer extends Mailer implements CampaignEmailSenderInterface
             Craft::error('sprout-mailchimp', $e->getMessage());
         }
 
-        return null;
+        return [];
     }
 
 
@@ -558,5 +558,10 @@ class MailchimpMailer extends Mailer implements CampaignEmailSenderInterface
         }
 
         return $campaignIds;
+    }
+
+    public function sendTestCampaignEmail(CampaignEmail $campaignEmail)
+    {
+        return null;
     }
 }
