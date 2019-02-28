@@ -132,8 +132,8 @@ class MailchimpMailer extends Mailer implements CampaignEmailSenderInterface
             if (isset($campaignEmail->listSettings)) {
                 $listSettings = Json::decode($campaignEmail->listSettings);
 
-                if (!empty($listSettings->listIds)) {
-                    $listsCount = count($listSettings->listIds);
+                if (!empty($listSettings['listIds'])) {
+                    $listsCount = count($listSettings['listIds']);
                 }
             }
 
@@ -231,12 +231,13 @@ class MailchimpMailer extends Mailer implements CampaignEmailSenderInterface
         $text = $campaignEmail->getEmailTemplates()->getTextBody();
 
         $listSettings = $campaignEmail->listSettings;
+
         $listSettings = Json::decode($listSettings);
 
         $lists = [];
 
-        if (!empty($listSettings->listIds) && is_array($listSettings->listIds)) {
-            $lists = $listSettings->listIds;
+        if (is_array($listSettings['listIds']) && count($listSettings['listIds']) > 0) {
+            $lists = $listSettings['listIds'];
         }
 
         $mailChimpModel = new CampaignModel();
@@ -284,7 +285,7 @@ class MailchimpMailer extends Mailer implements CampaignEmailSenderInterface
             }
         }
 
-        return Craft::$app->getView()->renderTemplate('sprout-base-email/_modals/campaigns/prepare-email-snapshot', [
+        return Craft::$app->getView()->renderTemplate('sprout-campaign/_modals/campaigns/prepare-email-snapshot', [
             'mailer' => $this,
             'email' => $email,
             'campaignType' => $email->getCampaignType(),
