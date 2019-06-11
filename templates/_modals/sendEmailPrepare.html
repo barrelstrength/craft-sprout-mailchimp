@@ -1,6 +1,9 @@
 {% import "_includes/forms" as forms %}
 <div class="body">
 	<h1>{{ mailer.getTitle() }}</h1>
+
+	{%- if campaignEmail.isReadyToSend() or campaignEmail.isReadyToTest() -%}
+
 	<h2>{{ "Your content is ready to send." }}</h2>
 
 	<table class="data fullwidth">
@@ -55,4 +58,10 @@
 			</button>
 		</div>
 	</div>
+
+	{%- else -%}
+
+		<p>{{ "Please review your Campaign Email. Content or Lists are not ready to send."|t }}</p>
+
+	{%- endif -%}
 </div>
