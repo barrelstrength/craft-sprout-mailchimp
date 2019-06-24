@@ -10,6 +10,7 @@ namespace barrelstrength\sproutmailchimp;
 
 use barrelstrength\sproutmailchimp\integrationtypes\MailchimpIntegration;
 use barrelstrength\sproutforms\services\Integrations;
+use barrelstrength\sproutmailchimp\services\App;
 use Craft;
 use craft\base\Plugin;
 use craft\events\RegisterComponentTypesEvent;
@@ -19,6 +20,11 @@ use yii\base\Event;
 
 class SproutMailchimp extends Plugin
 {
+    /**
+     * @var App
+     */
+    public static $app;
+
     /**
      * @var bool
      */
@@ -40,6 +46,12 @@ class SproutMailchimp extends Plugin
     public function init()
     {
         parent::init();
+
+        $this->setComponents([
+            'app' => App::class
+        ]);
+
+        self::$app = $this->get('app');
 
         $projectConfig = Craft::$app->getProjectConfig();
         $pluginHandle = 'sprout-forms';

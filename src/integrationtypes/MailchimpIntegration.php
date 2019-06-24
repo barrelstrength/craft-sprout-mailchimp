@@ -8,6 +8,7 @@ use barrelstrength\sproutforms\fields\formfields\Email;
 use barrelstrength\sproutforms\fields\formfields\EmailDropdown;
 use barrelstrength\sproutforms\fields\formfields\Name;
 use barrelstrength\sproutforms\fields\formfields\SingleLine;
+use barrelstrength\sproutmailchimp\SproutMailchimp;
 use Craft;
 use GuzzleHttp\Client;
 use GuzzleHttp\RequestOptions;
@@ -15,6 +16,7 @@ use Twig\Error\LoaderError;
 use Twig\Error\RuntimeError;
 use Twig\Error\SyntaxError;
 use yii\base\InvalidConfigException;
+use \DrewM\MailChimp\MailChimp;
 
 /**
  * Add a subscriber into lists in Mailchmimp
@@ -51,7 +53,7 @@ class MailchimpIntegration extends Integration
     {
         $this->prepareFieldMapping();
 
-        $lists = [];
+        $lists = SproutMailchimp::$app->mailchimp->getListsAsOptions();
 
         return Craft::$app->getView()->renderTemplate('sprout-mailchimp/_components/integrationtypes/mailchimp/settings',
             [
