@@ -1,16 +1,15 @@
-# Sprout MailChimp
+# Countries Field for Sprout Forms
 
-Sprout MailChimp enables you to integrate MailChimp Campaigns and Lists into your Craft CMS workflow.
+A custom front-end Countries Field for [Sprout Forms](https://github.com/barrelstrength/craft-sprout-forms).
 
-## Campaign Emails
+## Installation
 
-- This plugin provides a MailChimp integration for Sprout Email. Send Campaign Emails via MailChimp from Craft.
+Add the library to your project via composer:
 
-## Lists
-
-- This plugin provides a MailChimp integration for Sprout Lists. Subscribe and Unsubscribe users to MailChimp lists from Craft.
-
-## Requirements
-
-- Craft CMS 2.6 or later
-- Sprout Email 3.0 or later
+``` php
+{
+    "require": {
+        "barrelstrength/sprout-forms-countries": "{version}"
+    }
+}
+```

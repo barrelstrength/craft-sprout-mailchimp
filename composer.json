@@ -1,6 +1,43 @@
 {
-  "name"   : "barrelstrengthdesign/sproutmailchimp",
-  "require": {
-    "mailchimp/mailchimp": "2.0.6"
-  }
+    "name": "barrelstrength/craft-sprout-mailchimp",
+    "description": "Mailchimp integrations for the Sprout Plugins",
+    "type": "craft-plugin",
+    "version": "1.0.0",
+    "keywords": [
+        "craft",
+        "cms",
+        "craftcms",
+        "craft-plugin",
+        "mailchimp"
+    ],
+    "support": {
+        "docs": "https://github.com/barrelstrength/craft-sprout-mailchimo/blob/master/README.md",
+        "issues": "https://github.com/barrelstrength/craft-sprout-mailchimo/issues"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Barrel Strength",
+            "homepage": "https://www.barrelstrengthdesign.com/"
+        }
+    ],
+    "require": {
+        "craftcms/cms": "^3.1.0",
+        "drewm/mailchimp-api": "^2.5.3"
+    },
+    "autoload": {
+        "psr-4": {
+          "barrelstrength\\sproutmailchimp\\": "src/"
+        }
+    },
+    "extra": {
+        "name": "Sprout Mailchimp",
+        "handle": "sprout-mailchimp",
+        "developer": "Barrel Strength",
+        "developerUrl": "https://barrelstrengthdesign.com",
+        "documentationUrl": "https://github.com/barrelstrength/craft-sprout-mailchimo/blob/master/README.md",
+        "changelogUrl": "https://github.com/barrelstrength/craft-sprout-mailchimo/blob/master/CHANGELOG.md",
+        "downloadUrl": "https://github.com/barrelstrength/craft-sprout-mailchimo/archive/master.zip",
+        "class": "barrelstrength\\sproutmailchimp\\SproutMailchimp"
+    }
 }
