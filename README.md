@@ -1,6 +1,6 @@
-# Countries Field for Sprout Forms
+# Mailchimp integrations for the Sprout Plugins
 
-A custom front-end Countries Field for [Sprout Forms](https://github.com/barrelstrength/craft-sprout-forms).
+- A custom Subscribe email to lists Integration for [Sprout Forms](https://github.com/barrelstrength/craft-sprout-forms).
 
 ## Installation
 
@@ -9,7 +9,7 @@ Add the library to your project via composer:
 ``` php
 {
     "require": {
-        "barrelstrength/sprout-forms-countries": "{version}"
+        "barrelstrength/craft-sprout-mailchimp": "{version}"
     }
 }
 ```
