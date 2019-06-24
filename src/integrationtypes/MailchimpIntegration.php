@@ -8,6 +8,7 @@ use barrelstrength\sproutforms\fields\formfields\Email;
 use barrelstrength\sproutforms\fields\formfields\EmailDropdown;
 use barrelstrength\sproutforms\fields\formfields\Name;
 use barrelstrength\sproutforms\fields\formfields\SingleLine;
+use barrelstrength\sproutmailchimp\services\Mailchimp;
 use barrelstrength\sproutmailchimp\SproutMailchimp;
 use Craft;
 use GuzzleHttp\Client;
@@ -16,7 +17,6 @@ use Twig\Error\LoaderError;
 use Twig\Error\RuntimeError;
 use Twig\Error\SyntaxError;
 use yii\base\InvalidConfigException;
-use \DrewM\MailChimp\MailChimp;
 
 /**
  * Add a subscriber into lists in Mailchmimp
@@ -107,34 +107,43 @@ class MailchimpIntegration extends Integration
      */
     public function submit(): bool
     {
-        if ($this->submitAction == '' || Craft::$app->getRequest()->getIsCpRequest()) {
+        if (Craft::$app->getRequest()->getIsCpRequest()) {
             return false;
         }
 
-        $entry = $this->entry;
         $fields = $this->resolveFieldMapping();
-        $endpoint = $this->submitAction;
+        $email = $fields['email'];
+        $firstName = $fields['firstName'];
+        $lastName = $fields['lastName'];
+        
+        if ($firstName instanceof \barrelstrength\sproutbasefields\models\Name){
+            $firstName = $firstName->firstName;
+        }
 
-        if (!filter_var($endpoint, FILTER_VALIDATE_URL)) {
-            $message = $entry->formName.' submit action is an invalid URL: '.$endpoint;
+        if ($lastName instanceof \barrelstrength\sproutbasefields\models\Name){
+            $lastName = $lastName->lastName;
+        }
+
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $message = 'Invalid email: '.$email;
             $this->addError('global', $message);
             Craft::error($message, __METHOD__);
 
             return false;
         }
 
-        $client = new Client();
+        $fields = ['FNAME' => $firstName, 'LNAME' => $lastName];
 
-        Craft::info($fields, __METHOD__);
+        $result = SproutMailchimp::$app->mailchimp->subscribeEmailToLists($this->lists, $email, $fields, Mailchimp::STATUS_SUBSCRIBED);
+        $resultAsJson = json_encode($result);
+        Craft::info("Mailchimp integration submitted: ".$resultAsJson, __METHOD__);
 
-        $response = $client->post($endpoint, [
-            RequestOptions::JSON => $fields
-        ]);
+        if ($result['status'] == 400){
+            $this->addError('global', $resultAsJson);
+            return false;
+        }
 
-        $res = $response->getBody()->getContents();
-        $resAsString = is_array($res) ? json_encode($res) : $res;
-        $this->successMessage = $resAsString;
-        Craft::info($res, __METHOD__);
+        $this->successMessage = "Email added to list(s)";
 
         return true;
     }

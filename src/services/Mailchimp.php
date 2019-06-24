@@ -14,6 +14,12 @@ use craft\base\Component;
  */
 class Mailchimp extends Component
 {
+    const STATUS_SUBSCRIBED = 'subscribed';
+    const STATUS_UNSUBSCRIBED = 'unsubscribed';
+    const STATUS_CLEANED = 'cleaned';
+    const STATUS_PENDING = 'pending';
+    const STATUS_TRANSACTIONAL = 'transactional';
+
     /**
      * @return MailchimpWrapper|null
      */
@@ -52,5 +58,37 @@ class Mailchimp extends Component
         }
 
         return $options;
+    }
+
+    /**
+     * @param array $lists
+     * @param string $email
+     * @param array $fields
+     * @param string $status
+     * @return |null
+     */
+    public function subscribeEmailToLists(array $lists, string $email, array $fields = [], $status = self::STATUS_SUBSCRIBED)
+    {
+        $mailchimp = $this->getMailchimp();
+        $result = null;
+
+        if (is_null($mailchimp)){
+            return $result;
+        }
+
+        $params = [
+            'email_address' => $email,
+            'status'        => $status
+        ];
+
+        if ($fields){
+            $params['merge_fields'] = $fields;
+        }
+
+        foreach ($lists as $list) {
+            $result = $mailchimp->post("lists/{$list}/members", $params);
+        }
+
+        return $result;
     }
 }
