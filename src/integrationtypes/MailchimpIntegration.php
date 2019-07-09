@@ -28,8 +28,6 @@ class MailchimpIntegration extends Integration
      */
     public $lists;
 
-    public $userConfirmationField;
-
     /**
      * @inheritDoc
      */
@@ -167,22 +165,30 @@ class MailchimpIntegration extends Integration
             $params = ['LNAME' => $lastName];
         }
 
-        $status = Mailchimp::STATUS_PENDING;
+        $mailchimp = SproutMailchimp::$app->mailchimp->getMailchimp();
+        $allListsFromApi = $mailchimp->get('lists');
 
-        if ($this->userConfirmationField){
-            $optInvalue = $this->entry->{$this->userConfirmationField};
-            if ($optInvalue){
-                $status = Mailchimp::STATUS_SUBSCRIBED;
-            }
+        $allLists = [];
+        foreach ($allListsFromApi['lists'] as $key => $list) {
+            $allLists[$list['id']] = $list;
         }
 
-        $result = SproutMailchimp::$app->mailchimp->subscribeEmailToLists($this->lists, $email, $params, $status);
-        $resultAsJson = json_encode($result);
-        Craft::info("Mailchimp integration submitted: ".$resultAsJson, __METHOD__);
+        foreach ($this->lists as $key => $list) {
+            $listArray = $allLists[$list];
+            $status = Mailchimp::STATUS_SUBSCRIBED;
 
-        if ($result['status'] == 400){
-            $this->addError('global', $resultAsJson);
-            return false;
+            if ($listArray['double_optin'] === true){
+                $status = Mailchimp::STATUS_PENDING;
+            }
+
+            $result = SproutMailchimp::$app->mailchimp->subscribeEmailToLists([$listArray['id']], $email, $params, $status);
+            $resultAsJson = json_encode($result);
+            Craft::info("Mailchimp integration submitted: ".$resultAsJson, __METHOD__);
+
+            if ($result['status'] == 400){
+                $this->addError('global', $resultAsJson);
+                return false;
+            }
         }
 
         $this->successMessage = "Email added to list(s)";

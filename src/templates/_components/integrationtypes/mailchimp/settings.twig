@@ -13,15 +13,6 @@
     </div>
 </div>
 
-{{ forms.selectField({
-    first: true,
-    label: "User Confirmation (Opt-in field)<span class='info'>By default the subscriber has pending status, if any of the next opt-in fields is checked the status will be set to subscribed.</span>"|t('sprout-forms'),
-    id: 'userConfirmationField',
-    name: 'userConfirmationField',
-    options: optInFieldsAsOptions,
-    value: integration.userConfirmationField
-}) }}
-
 {{ forms.editableTableField({
     label: "Field Mapping"|t('sprout-mailchimp'),
     info: "The field in your form.",

@@ -7,7 +7,7 @@ use craft\base\Component;
 class App extends Component
 {
     /**
-     * @var Groups
+     * @var Mailchimp
      */
     public $mailchimp;
 
