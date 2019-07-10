@@ -2,14 +2,19 @@
 
 namespace barrelstrength\sproutmailchimp\models;
 
+<<<<<<< HEAD
 use barrelstrength\sproutbase\base\SproutSettingsInterface;
 use craft\base\Model;
 use Craft;
+=======
+use craft\base\Model;
+>>>>>>> feature/craft3
 
 /**
  *
  * @property array $settingsNavItems
  */
+<<<<<<< HEAD
 class Settings extends Model implements SproutSettingsInterface
 {
     public $apiKey;
@@ -73,3 +78,17 @@ class Settings extends Model implements SproutSettingsInterface
        ];
     }
 }
+=======
+class Settings extends Model
+{
+    public $mailchimpApi = '';
+
+
+    public function rules(): array
+    {
+        return [
+            [['mailchimpApi'], 'required']
+        ];
+    }
+}
+>>>>>>> feature/craft3

@@ -1,0 +1,46 @@
+{% import "_includes/forms" as forms %}
+
+<div class="field">
+    <div class="heading">
+        <label id="field-lists-label" class="required" for="field-name">{{ "Lists"|t }}</label>
+    </div>
+    <div class="input">
+        {{ forms.checkboxGroup({
+            name: 'lists',
+            options: listOptions,
+            values: integration.lists
+        }) }}
+    </div>
+</div>
+
+{{ forms.editableTableField({
+    label: "Field Mapping"|t('sprout-mailchimp'),
+    info: "The field in your form.",
+    id: 'fieldMapping',
+    name: 'fieldMapping',
+    minRows: integration.fieldMapping|length,
+    maxRows: integration.fieldMapping|length,
+    cols: {
+        sourceFormField: {
+            type: 'singleline',
+            heading: "Form Field"|t('sprout-mailchimp'),
+            class: 'formField'
+        },
+        targetIntegrationField: {
+            type: 'select',
+            heading: "Subscriber Attribute"|t('sprout-mailchimp'),
+            class: 'targetFields',
+            options: []
+        }
+    },
+    rows: integration.fieldMapping,
+    errors: []|unique
+}) }}
+
+{% js %}
+    new Craft.SproutForms.Integration({
+    updateTargetFieldsAction: '{{ integration.getUpdateTargetFieldsAction() }}',
+    updateSourceFieldsAction: '{{ integration.getUpdateSourceFieldsAction() }}',
+    integrationType: '{{ className(integration)|e('js') }}'
+    });
+{% endjs %}
