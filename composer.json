@@ -1,5 +1,5 @@
 {
-    "name": "barrelstrength/craft-sprout-mailchimp",
+    "name": "barrelstrength/sprout-mailchimp",
     "description": "Mailchimp integrations for the Sprout Plugins",
     "version": "1.0.0",
     "type": "craft-plugin",
