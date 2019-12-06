@@ -276,9 +276,7 @@ class MailchimpMailer extends Mailer implements CampaignEmailSenderInterface
         $lists = [];
 
         if (!isset($listSettings['listIds'])) {
-            throw new Exception(Craft::t('sprout-mailchimp', 'No list settings found. <a href="{cpEditUrl}">Add a list</a>', [
-                'cpEditUrl' => $email->getCpEditUrl()
-            ]));
+            throw new Exception('No list settings found.');
         }
 
         if (is_array($listSettings['listIds']) && count($listSettings['listIds'])) {

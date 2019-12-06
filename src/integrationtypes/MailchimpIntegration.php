@@ -202,7 +202,7 @@ class MailchimpIntegration extends Integration
     public function resolveFieldMapping(): array
     {
         $fields = [];
-        $entry = $this->entry;
+        $entry = $this->formEntry;
 
         if ($this->fieldMapping) {
             foreach ($this->fieldMapping as $fieldMap) {

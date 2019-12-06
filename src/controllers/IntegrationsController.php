@@ -56,7 +56,7 @@ class IntegrationsController extends BaseController
     {
         $fieldMapping = $integration->fieldMapping;
 
-        $formFields = $integration->getFormFieldsAsMappingOptions();
+        $formFields = $integration->getSourceFormFieldsAsMappingOptions();
         $rowPosition = 0;
         $finalOptions = [];
 
